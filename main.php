@@ -106,9 +106,23 @@ while ($row = mysqli_fetch_row($out)) {
 echo "<!DOCTYPE html>
 <html>
 <head>
-<link href='https://fonts.googleapis.com/css2?family=Source+Code+Pro:ital,wght@0,400;0,700;1,400;1,700&display=swap' rel='stylesheet'>
+<script src='jquery.min.js'></script>
+<link href='font.css' rel='stylesheet'>
 <link rel='stylesheet' type='text/css' href='stylesheet.css'>
 <link rel='shortcut icon' type='image/x-icon' href='DATA/icon.ico'>
+
+<script>
+$(window).scroll(function() {
+  sessionStorage.scrollTop = $(this).scrollTop();
+});
+
+$(document).ready(function() {
+  if (sessionStorage.scrollTop != 'undefined') {
+    $(window).scrollTop(sessionStorage.scrollTop);
+  }
+});
+</script>
+
 <title>$title</title>
 </head>
 
@@ -119,7 +133,7 @@ echo "<!DOCTYPE html>
 
 ";
 
-$URL='https://www.levi-jacobs.de/MAINPAGE';
+$URL=(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
 
 
 if(isset($_POST['createano'])){
@@ -177,12 +191,20 @@ if(isset($_POST['login']) and ctype_alnum($_POST['login_username'])){
     $password=md5('#'.$_POST['login_password'].'#');
 }
 
+$userexist=0;
 $sql = "SELECT id, username, password_orig FROM user WHERE password='$password' AND username='$username';";
 $out = mdq($bindung, $sql);
 while ($row = mysqli_fetch_row($out)) {
     $userid=$row[0];
     $username=$row[1];
     $password_orig=$row[2];
+    $userexist=1;
+}
+
+if($userexist == 0){
+    $userid='';
+    $username='';
+    $password_orig='';
 }
 
 
@@ -569,7 +591,6 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
 
             $in=0;
             $sql = "SELECT blogs.id, blogs.name, user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl FROM blogs, user, blogposts, votes, subscriptions WHERE blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.blog=blogs.id AND ($searchstr) GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc$end;";
-            echo $sql;
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
@@ -717,6 +738,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                     $firstpost=$gtb[1];
                 }
 
+                echo "<input type='hidden' name='heartcomment' id='heartcomment' value='0'>";
                 echo "<input type='hidden' name='deletecomment' id='deletecomment' value='0'>";
                 echo "<input type='hidden' name='commentstat' id='commentstat' value='".$_POST['commentstat']."'>";
                 
@@ -786,6 +808,9 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
 
                         if(isset($_POST['comment'.$postid]) and $_POST['commenttext'.$postid] != "" and $_POST['commenttext'.$postid] != "Write Comment"){
                             $sql = "INSERT INTO comments SET user=$userid, content='".$_POST['commenttext'.$postid]."', type=0, type_id=$postid;";
+                            $out3 = mdq($bindung, $sql);
+
+                            $sql = "INSERT INTO hearts set user=-1, comment=LAST_INSERT_ID();";
                             $out3 = mdq($bindung, $sql);                            
                         }
                         
@@ -830,23 +855,63 @@ $origpost
 
                             
                             $commentin=0;
-                            $sql = "SELECT comments.content, user.username, user.id, comments.id FROM comments, user WHERE comments.user=user.id AND type=0 AND type_id=$postid;";
+                            $sql = "SELECT comments.content, user.username, user.id, comments.id, COUNT(CASE WHEN hearts.user!=-1 THEN 1 END) AS zahl FROM comments, user, hearts WHERE comments.user=user.id AND type=0 AND type_id=$postid AND hearts.comment=comments.id GROUP by comments.id ORDER by zahl desc, comments.id desc;";
                             $out3 = mdq($bindung, $sql);
                             while ($row3 = mysqli_fetch_row($out3)) {
-                                
+                                if($row3[2] != ''){
 
-                                if($_POST['deletecomment'] == $row3[3] and $row3[2] == $userid){
-                                    $sql = "DELETE FROM comments WHERE id=".$row3[3].";";
-                                    $out4 = mdq($bindung, $sql);
-                                }else{
-                                    
-                                    echo "<div class='post commentpost' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';\">";
-                                    if($row3[2] == $userid){
-                                        echo "<div id='mousebtns{$postid}_".$row3[3]."' style='display:none'><span class='grey greytxt right' onclick=\"deletecomment.value=".$row3[3].";document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</span></div>";
+                                    if($_POST['heartcomment'] == $row3[3]){
+                                        $heart_in=0;
+                                        $sql = "SELECT id FROM hearts WHERE user=$userid AND comment=".$row3[3].";";
+                                        $out4 = mdq($bindung, $sql);
+                                        while ($row4 = mysqli_fetch_row($out4)) {
+                                            $heart_in=1;
+                                        }
+                                        if($heart_in != 1){
+                                            $sql = "INSERT INTO hearts SET comment=".$row3[3].", user=$userid;";
+                                            $out4 = mdq($bindung, $sql);
+                                            $row3[4]++;
+                                        }
                                     }
                                     
-                                    echo "<div class='greytxt grey commentowner' $clickable_grey>".$row3[1]."</div><div class='commentbox'>".$row3[0]."</div></div>";
-                                    $commentin=1;
+                                    if($_POST['deletecomment'] == $row3[3] and $row3[2] == $userid){
+                                        $sql = "DELETE FROM comments WHERE id=".$row3[3].";";
+                                        $out4 = mdq($bindung, $sql);
+                                    }else{
+                                    
+                                        echo "<div class='post commentpost' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='inline-block';mousebtns_2_{$postid}_".$row3[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';mousebtns_2_{$postid}_".$row3[3].".style.display='none';\">";
+
+                                        $full='';
+                                        $heartcursor='';
+
+                                        if($row3[2] != $userid){
+                                            $clickable_heart="onmouseover=\"this.style.backgroundColor='#ffffff';this.style.color='#000000';heart".$row3[3].".style.filter='invert(1)';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';heart".$row3[3].".style.filter='invert(0)';\"";
+                                        }
+                                        else{
+                                            $clickable_heart='';
+                                            $full='_full';
+                                            $heartcursor='cursor:default;';
+                                        }
+                                    
+                                        $sql = "SELECT id FROM hearts WHERE user=$userid AND comment=".$row3[3].";";
+                                        $out4 = mdq($bindung, $sql);
+                                        while ($row4 = mysqli_fetch_row($out4)) {
+                                            $clickable_heart='';
+                                            $full='_full';
+                                            $heartcursor='cursor:default;';
+                                        }
+                                                                        
+                                        echo "<div class='greytxt grey commentowner' $clickable_grey>".$row3[1]."</div>";
+
+                                        if($row3[2] == $userid){
+                                            echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_".$row3[3]."' onclick=\"deletecomment.value=".$row3[3].";document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
+                                        }
+
+                                        echo "<div class='commentbox'>".nl2br($row3[0])."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-4px;width:20px;'></div>";
+                                        echo "</div>";
+                                    
+                                        $commentin=1;
+                                    }
                                 }
                             }
                             if($commentin == 0){
@@ -854,14 +919,15 @@ $origpost
                             }
                             
                             echo "</div></div>";
-
-                        if($firstpost == $postid){
-                            echo "<hr class='firstpostline'>";
-                        }
-
-
-                        
-                        $in=1;
+                            
+                            if($firstpost == $postid){
+                                echo "<hr class='firstpostline'>";
+                            }
+                            
+                            
+                            
+                            $in=1;
+                            
                     }
                 }
             
@@ -880,7 +946,8 @@ $origpost
     }
 
     if($password == 'NONE'){
-        echo "<div style='position:fixed;width:calc(".($sec/(60*60)*100)."% - 0px);left:0px;bottom:0px;background-color:#00ff00;color:black;text-align:center;'>$timeout</div>";
+#        echo "<div style='position:fixed;width:calc(".($sec/(60*60)*100)."% - 0px);left:0px;bottom:0px;background-color:#00ff00;color:black;text-align:center;'>$timeout</div>";
+        echo "<div style='position:fixed;width:90px;right:0px;bottom:0px;background-color:#00ff00;color:black;text-align:center;'>$timeout</div>";
     }
 }
 
