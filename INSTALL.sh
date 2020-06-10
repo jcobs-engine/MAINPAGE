@@ -22,8 +22,8 @@ function load()
 }
 
 load "Starting Installation Tool" 3
-sudo rm -f /srv/www/htdocs/*
-sudo cp * /srv/www/htdocs/
+sudo rm -rf /srv/www/htdocs/*
+sudo cp -r * /srv/www/htdocs/
 sudo zypper update -y
 
 load "Installing PHP" 5
