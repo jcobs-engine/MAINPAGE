@@ -39,14 +39,14 @@ sudo systemctl restart SuSEfirewall2
 sudo chown wwwrun /srv/www/htdocs/ -R
 
 load "Installing MariaDB" 5
-sudo zypper install mariadb mariadb-client mariadb-tools
+sudo zypper install -y mariadb mariadb-client mariadb-tools
 sudo systemctl start mysql
 sudo systemctl enable mysql
 mysql -u root --password='' < install.sql
 mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < MAINPAGE.sql
 
 load "Installing PHP" 5
-sudo zypper install php7 php7-mysql apache2-mod_php7
+sudo zypper install -y php7 php7-mysql apache2-mod_php7
 sudo a2enmod php7
 sudo systemctl restart apache2
 
