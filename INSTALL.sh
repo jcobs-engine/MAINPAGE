@@ -30,7 +30,7 @@ load "Installing PHP" 5
 sudo zypper install -y apache2
 sudo systemctl start apache2
 sudo systemctl enable apache2
-sudo systemctl status apache2
+sudo systemctl status --quiet apache2
 
 load "Installing Firewall" 5
 sudo zypper install -y SuSEfirewall2
@@ -43,7 +43,7 @@ load "Installing MariaDB" 5
 sudo zypper install mariadb mariadb-client mariadb-tools
 sudo systemctl start mysql
 sudo systemctl enable mysql
-sudo systemctl status mysql
+sudo systemctl status --quiet mysql
 mysql -u root --password='' < install.sql
 mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < MAINPAGE.sql
 
