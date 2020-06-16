@@ -833,6 +833,17 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                             echo "<span id='mousebtns$postid'></span>";
                         }
 
+                        $commentscount=0;
+                        $commentplural='s';
+                        $sql = "SELECT comments.id FROM comments WHERE type=0 AND type_id=$postid;";
+                        $out3 = mdq($bindung, $sql);
+                        while ($row3 = mysqli_fetch_row($out3)) {
+                            $commentscount++;
+                        }
+                        if($commentscount == 1){
+                            $commentplural='';
+                        }
+                        
                         echo "<div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title</div>
 <div style='display:block' id='htmlpost$postid'>
 $post
@@ -845,10 +856,11 @@ $origpost
 <span class='right greytxt grey' $clickable_grey style='display:none' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-View'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='Source-View'; }\">Source-View</span>
 
 <hr class='commentline'>
-<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid'>Comments</div>
+<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid'>$commentscount Comment$commentplural</div>
+<a name='commentarea$postid' class='sprung'></a>
 <div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
                             if($blogownerid != $userid){
-                                echo "<textarea class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write Comment</textarea>
+                                echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write Comment</textarea>
 <input type='submit' name='comment$postid' value='send' class='btn commentsend' $clickable_btn>";
                             }
 
@@ -879,7 +891,7 @@ $origpost
                                         $out4 = mdq($bindung, $sql);
                                     }else{
                                     
-                                        echo "<div class='post commentpost' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='inline-block';mousebtns_2_{$postid}_".$row3[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';mousebtns_2_{$postid}_".$row3[3].".style.display='none';\">";
+                                        echo "<div class='post commentpost' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='inline-block';mousebtns_2_{$postid}_".$row3[3].".style.display='inline-block';replys".$row3[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';mousebtns_2_{$postid}_".$row3[3].".style.display='none';replys".$row3[3].".style.display='none';\">";
 
                                         $full='';
                                         $heartcursor='';
@@ -906,8 +918,14 @@ $origpost
                                         if($row3[2] == $userid){
                                             echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_".$row3[3]."' onclick=\"deletecomment.value=".$row3[3].";document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
                                         }
+                                        else{
+                                            echo "<span id='mousebtns_2_{$postid}_".$row3[3]."'></span><span id='mousebtns{$postid}_".$row3[3]."'></span>";
+                                        }
 
-                                        echo "<div class='commentbox'>".nl2br($row3[0])."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-4px;width:20px;'></div>";
+                                        echo "<div class='commentbox'>".nl2br($row3[0])."<a href='#commentarea$postid' class='replybox' style='display:none;' $clickable_grey id='replys".$row3[3]."' onclick=\"commentarea$postid.value='@".$row3[1].":".$row3[3]." ';commentarea$postid.focus();\">reply</a></div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-4px;width:20px;'></div>";
+
+                                        
+                                        
                                         echo "</div>";
                                     
                                         $commentin=1;
