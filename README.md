@@ -8,7 +8,6 @@
 	<img src="https://img.shields.io/badge/license-GNU%20General%20Public%20License%20v3.0-blue.svg?style=flat">
 	<img src="https://img.shields.io/badge/requires-WebServer-black.svg?style=flat">
 	</p>
-	<br>
 	<p align="center">
 	<img src="https://img.shields.io/github/watchers/jcobs-engine/MAINPAGE?style=social">
 	<img src="https://img.shields.io/github/stars/jcobs-engine/MAINPAGE?style=social">
