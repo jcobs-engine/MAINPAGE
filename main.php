@@ -133,7 +133,7 @@ $(document).ready(function() {
 
 ";
 
-$URL=(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://$_SERVER[HTTP_HOST]";
+$URL=(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://".$_SERVER[HTTP_HOST].$_SERVER[REQUEST_URI];
 
 
 if(isset($_POST['createano'])){
@@ -243,7 +243,7 @@ if( $userid == '' or $ERROR_register != ''){
     }
 
         
-    echo "<a href='$URL/main.php'><img id='login_logo' src='DATA/logo_v1.png'></a>";
+    echo "<a href='$URL'><img id='login_logo' src='DATA/logo_v1.png'></a>";
     if($in == 1){
         echo "
 <input type='hidden' name='deletecookies' id='deletecookies' value='0'>
