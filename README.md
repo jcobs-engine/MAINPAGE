@@ -11,7 +11,7 @@
 	<p align="center">
 	<img src="https://img.shields.io/github/watchers/jcobs-engine/MAINPAGE?style=social">
 	<img src="https://img.shields.io/github/stars/jcobs-engine/MAINPAGE?style=social">
-</p
+</p>
 
 
 ## Installation
