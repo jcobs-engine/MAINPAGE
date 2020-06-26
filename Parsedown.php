@@ -421,7 +421,7 @@ class Parsedown
         if (preg_match('/^['.$Line['text'][0].']{3,}[ ]*([^`]+)?[ ]*$/', $Line['text'], $matches))
         {
             $Element = array(
-                'name' => 'code',
+                'name' => 'div',
                 'text' => '',
             );
 
@@ -441,8 +441,9 @@ class Parsedown
                  */
                 $language = substr($matches[1], 0, strcspn($matches[1], " \t\n\f\r"));
 
-                $class = 'language-'.$language;
-
+#MAINPAGE                $class = 'language-'.$language;
+                $class = 'PARSEDOWN_codeblock';
+                
                 $Element['attributes'] = array(
                     'class' => $class,
                 );
