@@ -20,7 +20,7 @@ function umlaute($post){
 $clickable_txt="onmouseover=\"this.style.color='#00ff00';\" onmouseout=\"this.style.color='#ffffff';\"";
 $clickable_greentxt="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='#00ff00';\"";
 $clickable_btn="onmouseover=\"this.style.backgroundColor='#00ff00';\" onmouseout=\"this.style.backgroundColor='#ffffff';\"";
-$clickable_field="onmouseover=\"this.style.border='2px solid #00ff00';this.style.borderLeft='4px solid #00ff00';this.style.color='#00ff00';\" onmouseout=\"this.style.border='2px solid #ffffff';this.style.borderLeft='4px solid #ffffff';this.style.color='#ffffff';\"";
+$clickable_field="onmouseover=\"this.style.backgroundColor='rgb(8%,8%,8%)';this.style.color='#00ff00';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';\"";
 $clickable_grey="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='rgb(60%, 60%, 60%)';\"";
 $clickable_post="onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(8%,8%,8%)';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='#000000';\"";
 
@@ -467,7 +467,7 @@ But after an hour, all activity will be deleted.<p>
 
     if(isset($_POST['createblog']) and $_POST['createblog_name'] != ""){
         $createblog_name=$_POST['createblog_name'];
-        if(ctype_alnum(str_replace('-', '', $createblog_name))){
+        if(ctype_alnum(str_replace('-', 'A', $createblog_name))){
             $stop=0;
             $sql = "SELECT id FROM blogs WHERE owner=$userid and name='$createblog_name';";
             $out = mdq($bindung, $sql);
@@ -493,7 +493,7 @@ But after an hour, all activity will be deleted.<p>
                 $ERROR_createblog='Blog exists';
         }
         else
-            $ERROR_createblog='The name must consist only of characters and/or digits';
+            $ERROR_createblog='The name must consist only of characters, minuses and/or digits';
     }
 
     $blogsdisplay='block';
@@ -560,7 +560,13 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
-                echo "<div class='listfield' $clickable_field onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$row[1]<span class='vote right bold' style='padding-top:0px;'>$row[2]</span></div>";
+                if($in == 0){
+                    $fieldlistaddon="style='border-top:2px solid #ffffff;'";
+                }
+                else{
+                    $fieldlistaddon="";
+                }
+                echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$row[1]<span class='vote right bold' style='padding-top:0px;'>$row[2]</span></div>";
                 $in=1;
             }
 
@@ -605,7 +611,15 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                         $vote=0;
                     }
                 }
-                echo "<div class='listfield' $clickable_field onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$searchname <span class='grey'>by <span $clickable_grey class='clickable'>$searchuser</span></span><span class='vote right bold' style='padding-top:0px;'>$vote</span>";
+
+                if($in == 0){
+                    $fieldlistaddon="style='border-top:2px solid #ffffff;'";
+                }
+                else{
+                    $fieldlistaddon="";
+                }
+
+                echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$searchname <span class='grey'>by <span $clickable_grey class='clickable'>$searchuser</span></span><span class='vote right bold' style='padding-top:0px;'>$vote</span>";
 
                 // THEMES
                 $themes='';
@@ -665,9 +679,9 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             $out = mdq($bindung, $sql);
         }
         
-        if(isset($_POST['newpost'.$blogid]) and $blogowner == $userid){
-            $newpost_title=$_POST['newpost_title'];
-            $newpost_text=$_POST['newpost_text'];
+        if(isset($_POST['newpost'.$blogid]) and $blogowner == $userid and $_POST['newpost_title'] != "" and $_POST['newpost_text']){
+            $newpost_title=str_replace("'", "\'", $_POST['newpost_title']);
+            $newpost_text=str_replace("'", "\'", $_POST['newpost_text']);
 
             $sql = "INSERT INTO blogposts SET title='$newpost_title', post='$newpost_text', blog=$blogid, time=".time().", date='".date("d.m.Y h:i A")."';";
             $out = mdq($bindung, $sql);
@@ -694,8 +708,8 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
         else{
 
             if(isset($_POST['editpost'.$blogid]) and $blogowner == $userid){
-                $editpost_title=$_POST['editpost_title'];
-                $editpost_text=$_POST['editpost_text'];
+                $editpost_title=str_replace("'", "\'", $_POST['editpost_title']);
+                $editpost_text=str_replace("'", "\'", $_POST['editpost_text']);
                 $editblogpostid=$_POST['editblogpostid'];
                 
                 $sql = "UPDATE blogposts SET title='$editpost_title', post='$editpost_text' WHERE id=$editblogpostid;";
@@ -752,7 +766,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                     # POST EDIT
                     
                     $post=umlaute($row2[2]);
-                    $post=nl2br(str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', Parsedown::instance()->line($post)));
+                    $post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', Parsedown::instance()->text($post));
                     $post=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $post);
                     $i=1000;
                     while ( $i > 0 ){
@@ -854,15 +868,16 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                         }
                         
                         echo "<div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title</div>
-<div style='display:block' id='htmlpost$postid'>
-$post
-</div>
 
 <div style='display:none' id='textpost$postid'>
 $origpost
 </div>
 
-<span class='right greytxt grey' $clickable_grey style='display:none' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-View'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='Source-View'; }\">Source-View</span>
+<div style='display:block;' id='htmlpost$postid'>
+$post
+</div>
+&shy;
+<span class='greytxt grey right' $clickable_grey style='display:none;' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-View'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='Source-View'; }\">Source-View</span>
 
 <hr class='commentline'>
 <div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid'>$commentscount Comment$commentplural</div>

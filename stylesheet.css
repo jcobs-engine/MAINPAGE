@@ -254,11 +254,11 @@ body{
 
 .listfield{
     display:block;
-    border:2px solid white;
+    border-bottom:2px solid white;
     padding:10px;
     padding-left:20px;
-    border-left:4px solid white;
-    margin-bottom:10px;
+    padding-right:20px;
+    margin-bottom:0px;
     cursor:pointer;
 }
 
@@ -414,4 +414,14 @@ body{
     border:1px solid #ffffff;
     cursor:pointer;
     font-size:14px;
+}
+
+/* PARSEDOWN */
+
+.PARSEDOWN_codeblock{
+    background-color:rgba(100%, 100%, 100%, 0.15);
+    position:relative;
+    width:calc(100% - 30px);
+    padding:10px;
+    border-radius:5px;
 }
