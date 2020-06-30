@@ -482,6 +482,10 @@ body{
     font-size:15px;
 }
 
+.reply{
+    padding-bottom:18px;
+}
+
 .postcontent{
     margin-bottom:-10px;
 }
