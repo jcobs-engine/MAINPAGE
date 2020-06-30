@@ -17,6 +17,12 @@ function umlaute($post){
     return $post;
 }
 
+function dlt_html($post){
+    $post=str_replace('>', '&gt;', $post);
+    $post=str_replace('<', '&lt;', $post);
+    return $post;
+}
+
 $clickable_txt="onmouseover=\"this.style.color='#00ff00';\" onmouseout=\"this.style.color='#ffffff';\"";
 $clickable_greentxt="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='#00ff00';\"";
 $clickable_btn="onmouseover=\"this.style.backgroundColor='#00ff00';\" onmouseout=\"this.style.backgroundColor='#ffffff';\"";
@@ -86,6 +92,8 @@ while ($row = mysqli_fetch_row($out)) {
     $sql2 = "DELETE FROM comments WHERE user=$did;";
     $out2 = mdq($bindung, $sql2);
     $sql2 = "DELETE FROM votes WHERE user=$did;";
+    $out2 = mdq($bindung, $sql2);
+    $sql2 = "DELETE FROM hearts WHERE user=$did;";
     $out2 = mdq($bindung, $sql2);
     $sql2 = "SELECT id FROM blogs WHERE owner=$did;";
     $out2 = mdq($bindung, $sql2);
@@ -511,6 +519,15 @@ But after an hour, all activity will be deleted.<p>
     
     # ===============  ALL SITES   =============== #
 
+    if($site == 0){
+        if($catsite == 2){
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> About";
+            echo "<div class='linkbox'><img src='DATA/jcobs-engine_logo.png' class='link_icon'><div class='link_text'>MAINPAGE<img src='DATA/discord_verified.png' class='link_verified_symbol'></div><div class='link_invite_link' onclick=\"window.open('https://github.com/jcobs-engine/MAINPAGE');\" onmouseover=\"this.style.backgroundColor='#2ba06b';\" onmouseout=\"this.style.backgroundColor='#43b581';\">Open</div><img src='DATA/github_logo.png' class='link_logo'><div class='link_title'>GitHub:</div></div>";
+            echo "<div class='linkbox' style='margin-bottom:0px;'><img src='DATA/discord_icon.png' class='link_icon'><div class='link_text'>MAINPAGE<img src='DATA/discord_verified.png' class='link_verified_symbol'></div><div class='link_invite_link' onclick=\"window.open('https://discord.gg/tbwgRDh','targetWindow',`resizable=no,width=500,height=650`);return false;\" onmouseover=\"this.style.backgroundColor='#2ba06b';\" onmouseout=\"this.style.backgroundColor='#43b581';\">Join</div><img src='DATA/discord_logo.png' class='link_logo'><div class='link_title'>Discord:</div></div>";
+            echo "</div>";
+        }
+    }
+    
     if($site == 1){
         if($catsite == '0'){
             echo "<div class='box' id='showprofile' style='display:$showdisplay'><div class='title'><span class='white'>></span> My Profile</div><div class='bold text'>$username</div>";
@@ -725,7 +742,14 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                 $blogownerid=$row[2];
                 
                 if($blogownerid == $userid){
-                    echo "<input type='hidden' name='deleteblogpost' id='deleteblogpost' value='0'><input type='hidden' name='editblogpost' id='editblogpost' value='0'><div class='artikel' id='newpost$blogid' style='display:none'><div class='title'><span class='white'>></span> New Post</div><input type='text' name='newpost_title' class='text' placeholder='Title' maxlength='64' required><textarea name='newpost_text' class='textarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\">Text</textarea><input type='submit' name='newpost$blogid' value='create' class='btn' $clickable_btn></div>";
+                    echo "
+<input type='hidden' name='deleteblogpost' id='deleteblogpost' value='0'>
+<input type='hidden' name='editblogpost' id='editblogpost' value='0'>
+<div class='artikel' id='newpost$blogid' style='display:none'><div class='title'><span class='white'>></span> New Post</div>
+<input type='text' name='newpost_title' class='text' placeholder='Title' maxlength='64'>
+<textarea name='newpost_text' class='textarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\">Text</textarea>
+<input type='submit' name='newpost$blogid' value='create' class='btn' $clickable_btn>
+</div>";
                 }
                 
                 echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid'><div class='title'><span class='white'>></span> $blogname <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogowner</span></span></div>";
@@ -755,6 +779,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                 echo "<input type='hidden' name='heartcomment' id='heartcomment' value='0'>";
                 echo "<input type='hidden' name='deletecomment' id='deletecomment' value='0'>";
                 echo "<input type='hidden' name='commentstat' id='commentstat' value='".$_POST['commentstat']."'>";
+                echo "<input type='hidden' name='replystat' id='replystat' value='".$_POST['replystat']."'>";
                 
                 $in=0;
                 $sql = "SELECT blogposts.id, title, post, date, COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END) AS zahl$newsql1 FROM blogposts, votes WHERE votes.type=0 AND votes.type_id=blogposts.id AND blog=$blogid AND post!='' AND title!='' GROUP BY blogposts.id ORDER by$newsql2 blogposts.id desc;";
@@ -775,16 +800,18 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                         $i--;
                     }
 
-                    $origpost=nl2br(umlaute($row2[2]));
+                    $origpost=nl2br(umlaute(dlt_html($row2[2])));
                     
                     # [END] POST EDIT
 
                     
                     if($_POST['commentstat'] == $postid){
                         $commentboxdisplay[$postid]='block';
+                        $commentarrow_stylechanges='transform:rotate(0deg);';
                     }
                     else{
                         $commentboxdisplay[$postid]='none';
+                        $commentarrow_stylechanges='';
                     }
 
                     
@@ -837,20 +864,20 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                             $style='cursor:default;';
                         else
                             $style='';
-
-                        #<div class='pnts_up' style='display:none' id='voteup_$postid' onclick=\"votefor$postid.value=1;document.mainpage.submit();\">+</div><div class='pnts_down' style='display:none' id='votedown_$postid' onclick=\"votefor$postid.value=-1;document.mainpage.submit();\">-</div>
                         
                         echo "<input type='hidden' name='votefor$postid' id='votefor$postid' value='0'><div class='post' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(8%,8%,8%)';mousebtns$postid.style.display='block';bubbleview$postid.style.display='block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='#000000';mousebtns$postid.style.display='none';bubbleview$postid.style.display='none';\">
 
-<div style='float:left; cursor:pointer;' onmouseout=\"{$block}pnts$postid.style.display='block';{$block}voteup_$postid.style.display='none';votedown_$postid.style.display='none';\">
+<div style='float:left; cursor:pointer;' onmouseout=\"{$block}pnts$postid.style.display='block';{$block}voteup_$postid.style.display='none';{$block}votedown_$postid.style.display='none';\">
 <img src='DATA/vote_white.png' class='pnts_up' style='display:none' id='voteup_$postid' onclick=\"votefor$postid.value=1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_green.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
 <img src='DATA/vote_white.png' class='pnts_down' style='display:none' id='votedown_$postid' onclick=\"votefor$postid.value=-1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_red.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
 </div>
 
-<div class='pnts' style='$style$block' onmouseover=\"{$block}this.style.display='none';{$block}voteup_$postid.style.display='block';votedown_$postid.style.display='block';\" id='pnts$postid'>$votes</div>";
+<div class='pnts' style='$style$block' onmouseover=\"{$block}this.style.display='none';{$block}voteup_$postid.style.display='block';{$block}votedown_$postid.style.display='block';\" id='pnts$postid'>$votes</div>";
 
                         if($blogownerid == $userid){
-                            echo "<div id='mousebtns$postid' style='display:none'><span class='grey greytxt right' onclick=\"deleteblogpost.value=$postid;document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</span><span class='grey greytxt right' onclick=\"editblogpost.value=$postid;document.mainpage.submit();\" $clickable_grey>edit</span></div>";
+                            echo "<div id='mousebtns$postid' style='display:none'><span class='grey greytxt right' onclick=\"deleteblogpost.value=$postid;document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</span><span class='grey greytxt right' onclick=\"editblogpost.value=$postid;document.mainpage.submit();\" $clickable_grey>edit</span></div>
+
+<span id='TRUEthis'></span><span id='TRUEvoteup_$postid'></span><span id='TRUEvotedown_$postid'></span><span id='TRUEpnts$postid'></span>";
                         }
                         else{
                             echo "<span id='mousebtns$postid'></span>";
@@ -869,6 +896,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                         
                         echo "<div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title</div>
 
+<div class='postcontent'>
 <div style='display:none' id='textpost$postid'>
 $origpost
 </div>
@@ -876,12 +904,12 @@ $origpost
 <div style='display:block;' id='htmlpost$postid'>
 $post
 </div>
+</div>
 &shy;
 <span class='greytxt grey right' $clickable_grey style='display:none;' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-View'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='Source-View'; }\">Source-View</span>
 
 <hr class='commentline'>
-<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid'>$commentscount Comment$commentplural</div>
-<a name='commentarea$postid' class='sprung'></a>
+<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount Comment$commentplural</div>
 <div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
                             if($blogownerid != $userid){
                                 echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write Comment</textarea>
@@ -895,7 +923,28 @@ $post
                             $out3 = mdq($bindung, $sql);
                             while ($row3 = mysqli_fetch_row($out3)) {
                                 if($row3[2] != ''){
+                                    $commentid=$row3[3];
+                                    
+                                    # REPLYS
 
+                                    if($_POST['replystat'] == $commentid){
+                                        $replyboxdisplay[$commentid]='block';
+                                        $replyarrow_stylechanges='transform:rotate(0deg);';
+                                    }
+                                    else{
+                                        $replyboxdisplay[$commentid]='none';
+                                        $replyarrow_stylechanges='';
+                                    }
+                                    
+                                    if(isset($_POST['replysend'.$commentid]) and $_POST['replytext'.$commentid] != "" and $_POST['replytext'.$commentid] != "Write Reply"){
+                                        $sql = "INSERT INTO comments SET user=$userid, content='".$_POST['replytext'.$commentid]."', type=1, type_id=$commentid;";
+                                        $out4 = mdq($bindung, $sql);
+                                    }
+                                    
+                                    # [END] REPLY
+
+                                    
+                                    
                                     if($_POST['heartcomment'] == $row3[3]){
                                         $heart_in=0;
                                         $sql = "SELECT id FROM hearts WHERE user=$userid AND comment=".$row3[3].";";
@@ -914,8 +963,28 @@ $post
                                         $sql = "DELETE FROM comments WHERE id=".$row3[3].";";
                                         $out4 = mdq($bindung, $sql);
                                     }else{
-                                    
-                                        echo "<div class='post commentpost' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='inline-block';mousebtns_2_{$postid}_".$row3[3].".style.display='inline-block';replys".$row3[3].".style.display='inline-block';replys2".$row3[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';mousebtns_2_{$postid}_".$row3[3].".style.display='none';replys".$row3[3].".style.display='none';replys2".$row3[3].".style.display='none';\">";
+
+                                        $replyscount=0;
+                                        $replyplural='s';
+                                        $sql = "SELECT comments.id FROM comments WHERE type=1 AND type_id=$commentid;";
+                                        $out4 = mdq($bindung, $sql);
+                                        while ($row4 = mysqli_fetch_row($out4)) {
+                                            $replyscount++;
+                                        }
+                                        if($replyscount == 1){
+                                            $replyplural='';
+                                        }
+                                        if($replyscount == 0){
+                                            $zeroreplysaddon='style="display:none;"';
+                                            $zeroreplysaddon2='reply';
+                                        }
+                                        else{
+                                            $zeroreplysaddon='';
+                                            $zeroreplysaddon2='';
+                                        }
+
+                                        
+                                        echo "<div class='post commentpost $zeroreplysaddon2' id='commentcontent$commentid' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='inline-block';mousebtns_2_{$postid}_".$row3[3].".style.display='inline-block';replys".$row3[3].".style.display='inline-block';replys2".$row3[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';mousebtns_2_{$postid}_".$row3[3].".style.display='none';replys".$row3[3].".style.display='none';replys2".$row3[3].".style.display='none';\">";
 
                                         $full='';
                                         $heartcursor='';
@@ -943,16 +1012,66 @@ $post
                                             echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_".$row3[3]."' onclick=\"deletecomment.value=".$row3[3].";document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
                                         }
                                         else{
-                                            echo "<span class='grey' style='display:none;font-size:14px;' id='replys2".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys".$row3[3]."' onclick=\"\" $clickable_grey>reply</div>
+                                            echo "<span class='grey' style='display:none;font-size:14px;' id='replys2".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys".$row3[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();replyline$commentid.style.display='block';opencomments$commentid.style.display='block';commentcontent$commentid.classList.remove('reply');\" $clickable_grey>reply</div>
 <span id='mousebtns_2_{$postid}_".$row3[3]."'></span><span id='mousebtns{$postid}_".$row3[3]."'></span>";
                                         }
 
-                                        echo "<div class='commentbox'>".nl2br($row3[0])."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-3px;width:16px;'></div>";
+                                        echo "<div class='commentbox'>".$row3[0]."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-3px;width:16px;'></div>";
+
+                                        ### <------- REPLYS -------> ##
+                                        
+                                        echo "<hr class='commentline' id='replyline$commentid' $zeroreplysaddon><div class='opencomments' id='opencomments$commentid' $zeroreplysaddon $clickable_txt 
+
+onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';}else{replystat.value='0';replycontent$commentid.style.display='none';reply_einklappen$commentid.style.transform='rotate(180deg)';}\"
+
+><img src='DATA/einklappen.png' class='einklappen' id='reply_einklappen$commentid' style='$replyarrow_stylechanges'>$replyscount Reply$replyplural</div><div class='comments' id='replycontent$commentid' style='display:".$replyboxdisplay[$commentid]."'>";
+                                        
+                                        echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>Write Reply</textarea>
+<input type='submit' name='replysend$commentid' value='send' class='btn commentsend' $clickable_btn>";
+                                        
+                                        
+                                        $replyin=0;
+                                        $sql = "SELECT comments.content, user.username, user.id, comments.id FROM comments, user WHERE comments.user=user.id AND comments.type=1 AND comments.type_id=$commentid ORDER by comments.id;";
+                                        $out4 = mdq($bindung, $sql);
+                                        while ($row4 = mysqli_fetch_row($out4)) {
+                                        if($row4[3] != ''){
+                                                $replyid=$row4[3];
+                                                
+                                                if($_POST['deletecomment'] == 'reply'.$row4[3] and $row4[2] == $userid){
+                                                    $sql = "DELETE FROM comments WHERE id=".$row4[3].";";
+                                                    $out5 = mdq($bindung, $sql);
+                                                }else{
+                                                    
+                                                    echo "<div class='post commentpost reply' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(24%,24%,24%)';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';replys{$commentid}_".$row4[3].".style.display='inline-block';replys2{$commentid}_".$row4[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='none';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='none';replys{$commentid}_".$row4[3].".style.display='none';replys2{$commentid}_".$row4[3].".style.display='none';\">";
+                                                    
+                                                    
+                                                    echo "<div class='greytxt grey commentowner' $clickable_grey>".$row4[1]."</div>";
+                                                    
+                                                    if($row4[2] == $userid){
+                                                        echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_{$commentid}_".$row4[3]."' onclick=\"deletecomment.value='reply".$row4[3]."';document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
+                                                    }
+                                                    else{
+                                                        echo "<span class='grey' style='display:none;font-size:14px;' id='replys2{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys{$commentid}_".$row4[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();\" $clickable_grey>reply</div>
+<span id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'></span><span id='mousebtns{$postid}_{$commentid}_".$row4[3]."'></span>";
+                                                    }
+
+                                                    echo "<div class='commentbox'>".$row4[0]."</div></div>";
+                                                    $replyin=1;
+                                                }                                        
+                                            }
+                                        }
+
+                                        if($replyin == 0){
+                                            echo "<center style='padding-bottom:15px;'>=== NO REPLYS ===</center>";
+                                        }
 
                                         
+                                        echo "</div>";
+                                        
+                                        ### <--END-- REPLYS -------> ##
                                         
                                         echo "</div>";
-                                    
+                                        
                                         $commentin=1;
                                     }
                                 }
@@ -983,7 +1102,7 @@ $post
 
             }
         }
-        }
+    }
     else{
         $_POST['gt_blogpost']='';
     }
