@@ -43,7 +43,7 @@ sudo zypper install -y mariadb mariadb-client mariadb-tools
 sudo systemctl start mysql
 sudo systemctl enable mysql
 mysql -u root --password='' < install.sql
-mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < MAINPAGE.sql
+mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < mainpage.sql
 
 load "Installing PHP" 5
 sudo zypper install -y php7 php7-mysql apache2-mod_php7
