@@ -4,6 +4,29 @@ body{
     font-family:'Source Code Pro', monospace;
 }
 
+table{
+    width:100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom:20px;
+}
+
+td,th{
+    margin:0;
+    padding:8px;
+    border:1px solid rgba(100%, 100%, 100%, 0.3);
+}
+
+th{
+    background-color:rgba(100%, 100%, 100%, 0.1);
+    text-align:left;
+}
+
+.emoji{
+    width:1em;
+    height:1em;
+}
+
 #header{
     position:fixed;
     top:0px;

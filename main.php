@@ -14,6 +14,13 @@ function umlaute($post){
     $post=str_replace('Ö', '&Ouml;', $post);
     $post=str_replace('ß', '&#223;', $post);
     $post=str_replace('ẞ', '&#7838;', $post);
+
+    $emojis=json_decode(shell_exec("cat github_emojis.json"));
+    
+    foreach( $emojis AS $emoji_txt => $emoji_url){
+        $post=str_replace(':'.$emoji_txt.':', '<img src="'.$emoji_url.'" class="emoji">', $post);
+    }
+    
     return $post;
 }
 
@@ -558,6 +565,10 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                 $styleaddon='';
                 if($row[4] == 1){
                 $styleaddon='font-weight:bold;';
+                }
+
+                if($in == 0){
+                    $styleaddon.="border-top:2px solid #ffffff;";
                 }
 
                 echo "<div class='listfield' $clickable_field style='$styleaddon' onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$searchname <span class='grey'>by <span $clickable_grey class='clickable'>$searchuser</span></span><span class='vote right bold' style='padding-top:0px;'>$vote</span></div>";
