@@ -29,6 +29,8 @@ function dlt_html($post){
     $post=str_replace('.png" class="emoji">', ':', $post);
     $post=str_replace('>', '&gt;', $post);
     $post=str_replace('<', '&lt;', $post);
+    $post=str_replace(' ', '&nbsp;', $post);
+
     return $post;
 }
 
