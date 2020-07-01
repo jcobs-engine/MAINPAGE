@@ -25,6 +25,8 @@ function umlaute($post){
 }
 
 function dlt_html($post){
+    $post=str_replace('<img src="DATA/github_emojis/', ':', $post);
+    $post=str_replace('.png" class="emoji">', ':', $post);
     $post=str_replace('>', '&gt;', $post);
     $post=str_replace('<', '&lt;', $post);
     return $post;
@@ -811,7 +813,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                         $i--;
                     }
 
-                    $origpost=nl2br(umlaute(dlt_html($row2[2])));
+                    $origpost=nl2br(dlt_html(umlaute($row2[2])));
                     
                     # [END] POST EDIT
 
