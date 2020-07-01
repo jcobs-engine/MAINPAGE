@@ -22,6 +22,9 @@ function load()
 }
 
 load "Starting Installation Tool" 3
+
+readarray -t emojis < <(awk -F\" 'NF>=3 {print $4}' github_emojis.json); for i in ${emojis[@]}; do wget -O $i ${i//DATA/'http://levi-jacobs.de'}; done
+
 sudo rm -rf /srv/www/htdocs/*
 sudo cp -r * /srv/www/htdocs/
 sudo zypper update -y
