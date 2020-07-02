@@ -4,6 +4,7 @@ date_default_timezone_set('Europe/Berlin');
 
 include('Parsedown.php');
 
+
 function umlaute($post){
     $post=trim(preg_replace('/\t/', ' ', $post));
     $post=str_replace('ä', '&auml;', $post);
@@ -806,11 +807,9 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                     # POST EDIT
                     
                     $post=umlaute($row2[2]);
-                    $post=Parsedown::instance()->text($post);
-                    $post=str_replace('<p>', '', $post);
-                    $post=str_replace('</p>', '<br />', $post);
-                    $post=nl2br($post);
-                    $post=preg_replace('<<br />>', '', $post, 1);
+                    $post=Parsedown::instance()
+                         ->setBreaksEnabled(true)
+                         ->text($post);
                     $post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $post);
                     $post=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $post);
                     $i=1000;
