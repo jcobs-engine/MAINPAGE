@@ -17,26 +17,34 @@
 
 ## Installation
 
-#### OpenSuse
+### OpenSuse
 
 ```Shell
 user@localhost:~> git clone https://github.com/jcobs-engine/MAINPAGE.git
 user@localhost:~> cd MAINPAGE/
 user@localhost:~/MAINPAGE> bash INSTALL.sh
 ```
-#### Other Distributions
+### Other Distributions
 
 1. Install **Apache2**, **MySQL** and **PHP7**.
-2. Copy the MAINPAGE-Data into Apache2-Directory. 
-3. Set up database: 
-```Shell
-user@localhost:~> mysql -u root --password='' < install.sql
-user@localhost:~> mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < MAINPAGE.sql
-```
+2. Download Symbols:
+   ```shell
+   bash GET_EMOJIS.sh
+   ```
+3. Copy the MAINPAGE-Data into Apache2-Directory. 
+4. Set up database: 
+   ```Shell
+   user@localhost:~> mysql -u root --password='' < install.sql
+   user@localhost:~> mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE <   MAINPAGE.sql
+   ```
+### Troubleshooting
+
+- Try disable or configure Firewall
+- Check permissions of WebServer-Directory
+- **Ask in Issues!**
 
 ## Usage
 
 1. Check **IP-Address** of Server.
-
 2. Open **IP-Address** in a Browser.
 
