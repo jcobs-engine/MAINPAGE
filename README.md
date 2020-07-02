@@ -30,13 +30,13 @@ user@localhost:~/MAINPAGE> bash INSTALL.sh
 1. Install **Apache2**, **MySQL** and **PHP7**.
 2. Download Symbols:
    ```shell
-   bash GET_EMOJIS.sh
+   user@localhost:~> bash GET_EMOJIS.sh
    ```
 3. Copy the MAINPAGE-Data into Apache2-Directory. 
-4. Set up database: 
+4. Set up database:
    ```Shell
-   user@localhost:~> mysql -u root --password='' < install.sql
-   user@localhost:~> mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE <   MAINPAGE.sql
+   user@localhost:~> sudo mysql -u root --password='' < install.sql
+   user@localhost:~> sudo mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < MAINPAGE.sql
    ```
 ### Troubleshooting
 
