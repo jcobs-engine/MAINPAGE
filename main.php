@@ -31,7 +31,7 @@ function dlt_html($post){
     $post=str_replace('<', '&lt;', $post);
     $post=str_replace(' ', '&nbsp;', $post);
 
-    return $post;
+    return $post.'<p>';
 }
 
 $clickable_txt="onmouseover=\"this.style.color='#00ff00';\" onmouseout=\"this.style.color='#ffffff';\"";
@@ -806,7 +806,12 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                     # POST EDIT
                     
                     $post=umlaute($row2[2]);
-                    $post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', Parsedown::instance()->text($post));
+                    $post=Parsedown::instance()->text($post);
+                    $post=str_replace('<p>', '', $post);
+                    $post=str_replace('</p>', '<br />', $post);
+                    $post=nl2br($post);
+                    $post=preg_replace('<<br />>', '', $post, 1);
+                    $post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $post);
                     $post=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $post);
                     $i=1000;
                     while ( $i > 0 ){
