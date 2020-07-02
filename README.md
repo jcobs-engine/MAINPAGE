@@ -11,6 +11,7 @@
 <p align="center">
 	<img src="https://img.shields.io/github/watchers/jcobs-engine/MAINPAGE?style=social">
 	<img src="https://img.shields.io/github/stars/jcobs-engine/MAINPAGE?style=social">
+    <img src="https://img.shields.io/github/forks/jcobs-engine/MAINPAGE?style=social">
 </p>
 
 **MAINPAGE** is a *free* and *open source* social network platform. It is easy to install and use on every Linux System.
@@ -45,6 +46,8 @@ user@localhost:~/MAINPAGE> bash INSTALL.sh
 
 ## Usage
 
-1. Check **IP-Address** of Server.
-2. Open **IP-Address** in a Browser.
+After successful installation, you can open MAINPAGE with the IP-address in a browser.
 
+## Credits
+
+- **Emanuil Rusev**, Great Markdown Parser for PHP: https://github.com/erusev/parsedown
