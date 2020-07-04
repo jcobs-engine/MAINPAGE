@@ -30,7 +30,7 @@ function dlt_html($post){
     $post=str_replace('.png" class="emoji">', ':', $post);
     $post=str_replace('>', '&gt;', $post);
     $post=str_replace('<', '&lt;', $post);
-    $post=str_replace(' ', '&nbsp;', $post);
+    $post=str_replace(' ', '&nbsp;&shy;', $post);
 
     return $post.'<p>';
 }
@@ -126,6 +126,14 @@ while ($row = mysqli_fetch_row($out)) {
 echo "<!DOCTYPE html>
 <html>
 <head>
+
+<title>$title</title>
+<meta name='description' content='A free, open source and anonymous social network. Create and read blogs, forums and chats, or participate in votings. Be a part of the community!'>
+<meta name='keywords' content='mainpage, social network, network, anonymous, community, blogs, blog, forum, forums, chat, chats, votings'>
+
+<meta charset='utf-8'>
+<meta http-equiv='content-type' content='text/html; charset=utf-8'>
+
 <script src='jquery.min.js'></script>
 <link href='font.css' rel='stylesheet'>
 <link rel='stylesheet' type='text/css' href='stylesheet.css'>
@@ -143,7 +151,6 @@ $(document).ready(function() {
 });
 </script>
 
-<title>$title</title>
 </head>
 
 <body $bodyaddon>
