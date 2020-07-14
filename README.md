@@ -1,5 +1,3 @@
-
-
 # MAINPAGE
 
 <p align="center">
@@ -36,7 +34,7 @@ user@localhost:~/MAINPAGE> bash INSTALL.sh
 4. Set up database:
    ```Shell
    user@localhost:~> sudo mysql -u root --password='' < install.sql
-   user@localhost:~> sudo mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < MAINPAGE.sql
+   user@localhost:~> sudo mysql -u MAINPAGE --password='MAINPAGE' MAINPAGE < database_mainpage.sql
    ```
 ### Troubleshooting
 
