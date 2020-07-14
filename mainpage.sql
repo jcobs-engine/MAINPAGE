@@ -1,8 +1,8 @@
--- MySQL dump 10.16  Distrib 10.2.31-MariaDB, for Linux (x86_64)
+-- MySQL dump 10.16  Distrib 10.2.32-MariaDB, for Linux (x86_64)
 --
 -- Host: localhost    Database: MAINPAGE
 -- ------------------------------------------------------
--- Server version	10.2.31-MariaDB
+-- Server version	10.2.32-MariaDB
 
 /*!40101 SET @OLD_CHARACTER_SET_CLIENT=@@CHARACTER_SET_CLIENT */;
 /*!40101 SET @OLD_CHARACTER_SET_RESULTS=@@CHARACTER_SET_RESULTS */;
@@ -218,6 +218,33 @@ LOCK TABLES `votes` WRITE;
 /*!40000 ALTER TABLE `votes` DISABLE KEYS */;
 /*!40000 ALTER TABLE `votes` ENABLE KEYS */;
 UNLOCK TABLES;
+
+--
+-- Table structure for table `votings`
+--
+
+DROP TABLE IF EXISTS `votings`;
+/*!40101 SET @saved_cs_client     = @@character_set_client */;
+/*!40101 SET character_set_client = utf8 */;
+CREATE TABLE `votings` (
+  `id` int(11) NOT NULL AUTO_INCREMENT,
+  `type` int(11) DEFAULT NULL,
+  `typeid` int(11) DEFAULT NULL,
+  `description` text DEFAULT NULL,
+  `time` int(11) DEFAULT NULL,
+  `owner` int(11) DEFAULT NULL,
+  PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
+/*!40101 SET character_set_client = @saved_cs_client */;
+
+--
+-- Dumping data for table `votings`
+--
+
+LOCK TABLES `votings` WRITE;
+/*!40000 ALTER TABLE `votings` DISABLE KEYS */;
+/*!40000 ALTER TABLE `votings` ENABLE KEYS */;
+UNLOCK TABLES;
 /*!40103 SET TIME_ZONE=@OLD_TIME_ZONE */;
 
 /*!40101 SET SQL_MODE=@OLD_SQL_MODE */;
@@ -228,4 +255,4 @@ UNLOCK TABLES;
 /*!40101 SET COLLATION_CONNECTION=@OLD_COLLATION_CONNECTION */;
 /*!40111 SET SQL_NOTES=@OLD_SQL_NOTES */;
 
--- Dump completed on 2020-06-10  9:32:12
+-- Dump completed on 2020-07-14 15:46:15
