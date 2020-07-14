@@ -39,6 +39,12 @@ function umlaute($post){
     return $post;
 }
 
+function dlt_doublebr($post){
+    $post=preg_replace("/\r|\n/", "", $post);
+    $post=str_replace("<br /><br />", '<p>', $post);
+    return $post;
+}
+
 function dlt_html($post){
     $post=str_replace('<img src="DATA/github_emojis/', ':', $post);
     $post=str_replace('.png" class="emoji">', ':', $post);
@@ -614,7 +620,7 @@ But after an hour, all activity will be deleted.<p>
     # START
     echo "
 <div id='header'>
-<img class='logo' src='DATA/logo_$version.png' class='clickable' onclick=\"catsite.value=0;site.value=0;document.mainpage.submit();\">
+<img class='logo clickable' src='DATA/logo_$version.png' onclick=\"catsite.value=0;site.value=0;document.mainpage.submit();\" onmouseover=\"this.src='DATA/greenlogo_$version.png';\" onmouseout=\"this.src='DATA/logo_$version.png';\">
 <!-- SITE NO. 1 --><div class='header_child' ".$clickable_txt1." onclick=\"catsite.value=0;site.value=1;document.mainpage.submit();\"><span style='border-bottom:${userpx}px solid #00ff00'>Users</span></div>
 <!-- SITE NO. 2 --><div class='header_child' ".$clickable_txt2." onclick=\"catsite.value=0;site.value=2;document.mainpage.submit();\"><span style='border-bottom:${grouppx}px solid #00ff00'>Groups</span></div>
 <!-- SITE NO. 3 --><div class='header_child' ".$clickable_txt3." onclick=\"catsite.value=0;site.value=3;document.mainpage.submit();\"><span style='border-bottom:${forumpx}px solid #00ff00'>Forums</span></div>
@@ -790,8 +796,8 @@ But after an hour, all activity will be deleted.<p>
                     $i--;
                 }
 
-                $origpost=nl2br(dlt_html(umlaute($row2[2])));
-                    
+                $origpost=dlt_doublebr(nl2br(dlt_html(umlaute($row2[2]))));
+                
                 # [END] POST EDIT
 
                     
@@ -897,7 +903,7 @@ $post
 <div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
 <div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
                         if($blogownerid != $userid){
-                            echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>write comment</textarea>
+                            echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write comment</textarea>
 <input type='submit' name='comment$postid' value='send' class='btn commentsend' $clickable_btn>";
                         }
 
@@ -1028,7 +1034,7 @@ onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commen
 
 ><img src='DATA/einklappen.png' class='einklappen' id='reply_einklappen$commentid' style='$replyarrow_stylechanges'>$replyscount repl$replyplural</div><div class='comments' id='replycontent$commentid' style='display:".$replyboxdisplay[$commentid]."'>";
                                         
-                                    echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>write reply</textarea>
+                                    echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>Write reply</textarea>
 <input type='submit' name='replysend$commentid' value='send' class='btn commentsend' $clickable_btn>";
                                         
                                         
@@ -1309,7 +1315,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
         }
         # $$$ MY BLOGS $$$ #
         if($catsite == '1'){
-            echo "<div class='box' id='createblog' style='display:$createblogdisplay'><div class='title'><span class='white'>></span> Create Blog</div><div class='errorspan' style='display:$createblogerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_createblog</div><input type='text' maxlength='32' class='text' name='createblog_name' placeholder='Name'><input type='submit' name='createblog' class='btn' $clickable_btn value='create'></div><div class='artikel' id='myblogs' style='display:$blogsdisplay'><div class='title'><span class='white'>></span> My Blogs</div><div class='rightbtn' $clickable_btn onclick=\"createblog.style.display='block';myblogs.style.display='none';\">create new</div>";
+            echo "<div class='box' id='createblog' style='display:$createblogdisplay'><div class='title'><span class='white'>></span> Create Blog</div><div class='errorspan' style='display:$createblogerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_createblog</div><input type='text' maxlength='32' class='text' name='createblog_name' placeholder='Name'><input type='submit' name='createblog' class='btn' $clickable_btn value='create'></div><div class='artikel' id='myblogs' style='display:$blogsdisplay'><div class='title'><span class='white'>></span> My Blogs</div><div class='rightbtn' $clickable_btn onclick=\"createblog.style.display='block';myblogs.style.display='none';\">Create new</div>";
 
             $in=0;
             $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)-COUNT(CASE WHEN blogposts.title='' THEN 1 END)), 0) AS zahl FROM blogs, user, blogposts, votes WHERE blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc;";
@@ -1334,7 +1340,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
         # $$$ SEARCH BLOGS $$$ #
         if($catsite == '2'){
             $search=$_POST['search'];
-            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='blog, post or user' value='$search' autofocus><input type='submit' name='createblog' class='btn' $clickable_btn value='search' style='margin-bottom:40px;'>";
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Blog, Post or User' value='$search' autofocus><input type='submit' name='createblog' class='btn' $clickable_btn value='search' style='margin-bottom:40px;'>";
 
             $end='';
             $searchstr='1=0';
@@ -1497,7 +1503,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                 
                 echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid'><div class='title'><span class='white'>></span> $blogname <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogowner</span></span></div>";
                 if($blogownerid == $userid){
-                    echo "<div class='rightbtn' $clickable_btn onclick=\"newpost$blogid.style.display='block';blog$blogid.style.display='none';\">new post</div>";
+                    echo "<div class='rightbtn' $clickable_btn onclick=\"newpost$blogid.style.display='block';blog$blogid.style.display='none';\">New post</div>";
                 }
                 else{
                     $sub=0;
@@ -1546,7 +1552,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                         $i--;
                     }
 
-                    $origpost=nl2br(dlt_html(umlaute($row2[2])));
+                    $origpost=dlt_doublebr(nl2br(dlt_html(umlaute($row2[2]))));
                     
                     # [END] POST EDIT
 
@@ -1662,7 +1668,7 @@ $post
 <div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
 <div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
                             if($blogownerid != $userid){
-                                echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>write comment</textarea>
+                                echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write comment</textarea>
 <input type='submit' name='comment$postid' value='send' class='btn commentsend' $clickable_btn>";
                             }
 
@@ -1793,7 +1799,7 @@ onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commen
 
 ><img src='DATA/einklappen.png' class='einklappen' id='reply_einklappen$commentid' style='$replyarrow_stylechanges'>$replyscount repl$replyplural</div><div class='comments' id='replycontent$commentid' style='display:".$replyboxdisplay[$commentid]."'>";
                                         
-                                        echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>write reply</textarea>
+                                        echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>Write reply</textarea>
 <input type='submit' name='replysend$commentid' value='send' class='btn commentsend' $clickable_btn>";
                                         
                                         
@@ -1922,7 +1928,7 @@ onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commen
             if($in == 1){
                 echo "
 <div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold'>$reportblogname</span> by <span $clickable_grey class='clickable bold'>$reportblogowner</span></span></div>
-<textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>write description</textarea>";
+<textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
                     
                     echo "<input type='hidden' name='reportuser' id='reportuser' value='0'>
 <div class='checkfield askreportuser' onmouseover=\"field3.style.color='#00ff00';\" onmouseout=\"field3.style.color='#ffffff';\" onclick=\"if(reportuser.value == 0){field3.innerHTML='[x]';reportuser.value=1;}else{field3.innerHTML='[ ]';reportuser.value=0;}\"><span id='field3'>[ ]</span> Report User</div>";
@@ -1959,7 +1965,7 @@ Blog already reported. See Votings.<p>
             if($in == 1){
                 echo "
 <div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold'>$reportblogpostowner</span></span></div>
-<textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>write description</textarea>";
+<textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
                     
                     echo "<input type='hidden' name='reportuser' id='reportuser' value='0'>
 <div class='checkfield askreportuser' onmouseover=\"field3.style.color='#00ff00';\" onmouseout=\"field3.style.color='#ffffff';\" onclick=\"if(reportuser.value == 0){field3.innerHTML='[x]';reportuser.value=1;}else{field3.innerHTML='[ ]';reportuser.value=0;}\"><span id='field3'>[ ]</span> Report User</div>";
