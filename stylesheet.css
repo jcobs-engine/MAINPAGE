@@ -584,12 +584,12 @@ th{
 
 .absolutetopright{
     position:absolute;
-    top:7px;
-    right:10px;
+    top:10px;
+    right:15px;
 }
 
 .secondtitle{
-    font-size:17px;
+    font-size:18px;
     color:rgba(100%, 100%, 100%, 0.5);
     font-weight:bold;
     cursor:pointer;
