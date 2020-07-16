@@ -764,6 +764,8 @@ But after an hour, all activity will be deleted.<p>
                 $title=$row2[1];
                 $SETTING['trenddesign']=1;
                 $SETTING['contentdesign']=0;
+
+                $blogowner=$blogownername;
                 
                 include("CODEBLOCKS/blogpost.php");
                 

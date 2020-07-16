@@ -128,7 +128,7 @@ if($postid != ''){
         if($SETTING['trenddesign'] == 0){
             echo "<div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title<img src='DATA/link.png' title='$URL_domain/content/$blogowner/$blogname/".str_replace(' ', '_', $title)."' class='linkicon_post' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname/".str_replace(' ', '_', $title)."';\"></div>";
         }else{
-                echo "<div class='absolutetopright secondtitle' $clickable_secondtitle onclick=\"site.value=4;catsite.value='blog#$blogid';gt_blogpost.value='{$blogid}_{$postid}';document.mainpage.submit();\">$blogname</div><div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogownername</span></span></div>";
+                echo "<div class='absolutetopright secondtitle' $clickable_secondtitle onclick=\"site.value=4;catsite.value='blog#$blogid';gt_blogpost.value='{$blogid}_{$postid}';document.mainpage.submit();\">$blogname</div><div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title<img src='DATA/link.png' title='$URL_domain/content/$blogowner/$blogname/".str_replace(' ', '_', $title)."' class='linkicon_post' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname/".str_replace(' ', '_', $title)."';\"> <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogownername</span></span></div>";
         }
         
         echo "<div class='postcontent'>
