@@ -17,7 +17,7 @@
 ## Installation
 
 ### OpenSuse
-
+:warning: The Apache2-Directory will be cleared!
 ```Shell
 user@localhost:~> git clone https://github.com/jcobs-engine/MAINPAGE.git
 user@localhost:~> cd MAINPAGE/

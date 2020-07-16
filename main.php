@@ -15,60 +15,25 @@
 
 $version='v1';
 
-date_default_timezone_set('UTC');
+include("CODEBLOCKS/functions.php");
 
-include('Parsedown.php');
-
-function umlaute($post){
-    $post=trim(preg_replace('/\t/', ' ', $post));
-    $post=str_replace('ä', '&auml;', $post);
-    $post=str_replace('ü', '&uuml;', $post);
-    $post=str_replace('ö', '&ouml;', $post);
-    $post=str_replace('Ä', '&Auml;', $post);
-    $post=str_replace('Ü', '&Uuml;', $post);
-    $post=str_replace('Ö', '&Ouml;', $post);
-    $post=str_replace('ß', '&#223;', $post);
-    $post=str_replace('ẞ', '&#7838;', $post);
-
-    $emojis=json_decode(shell_exec("cat github_emojis.json"));
-    
-    foreach( $emojis AS $emoji_txt => $emoji_url){
-        $post=str_replace(':'.$emoji_txt.':', '<img src="'.$emoji_url.'" class="emoji">', $post);
-    }
-    
-    return $post;
-}
-
-function dlt_doublebr($post){
-    $post=preg_replace("/\r|\n/", "", $post);
-    $post=str_replace("<br /><br />", '<p>', $post);
-    return $post;
-}
-
-function dlt_html($post){
-    $post=str_replace('<img src="DATA/github_emojis/', ':', $post);
-    $post=str_replace('.png" class="emoji">', ':', $post);
-    $post=str_replace('>', '&gt;', $post);
-    $post=str_replace('<', '&lt;', $post);
-    $post=str_replace(' ', '&nbsp;<wbr>', $post);
-
-    return $post.'<p>';
-}
-
-$clickable_txt="onmouseover=\"this.style.color='#00ff00';\" onmouseout=\"this.style.color='#ffffff';\"";
-$clickable_greentxt="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='#00ff00';\"";
-$clickable_btn="onmouseover=\"this.style.backgroundColor='#00ff00';\" onmouseout=\"this.style.backgroundColor='#ffffff';\"";
-$clickable_field="onmouseover=\"this.style.backgroundColor='rgb(8%,8%,8%)';this.style.color='#00ff00';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';\"";
-$clickable_grey="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='rgb(60%, 60%, 60%)';\"";
-$clickable_secondtitle="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='rgba(100%, 100%, 100%, 0.5)';\"";
-$clickable_post="onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(8%,8%,8%)';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='#000000';\"";
-$clickable_votingbtn_green="onmouseover=\"this.style.color='#00ff00';this.style.backgroundColor='#000000';\" onmouseout=\"this.style.backgroundColor='#ffffff';this.style.color='#000000';\"";
-$clickable_votingbtn_red="onmouseover=\"this.style.color='#ff0000';this.style.backgroundColor='#000000';\" onmouseout=\"this.style.backgroundColor='#ffffff';this.style.color='#000000';\"";
-$clickable_showbtn="onmouseover=\"this.style.backgroundColor='#ffffff';\" onmouseout=\"this.style.backgroundColor='rgba(100%, 100%, 100%, 0.4)';\"";
-
-$clickable_votingbtn_green_cap=$clickable_votingbtn_green;
-$clickable_votingbtn_red_cap=$clickable_votingbtn_red;
-
+$file='<html>
+  <head>
+    <title>MainPage</title>
+    <meta name="description" content="A free, open source and anonymous social
+				      network. Create and read blogs, forums and chats, or participate in
+				      votings. Be a part of the community!">
+    <meta name="keywords" content="mainpage, social network, network, anonymous,
+				   community, blogs, blog, forum, forums, chat, chats, votings">
+    <link rel="shortcut icon" type="image/x-icon" href="DATA/icon.ico">
+    <meta charset="utf-8">
+    <meta http-equiv="content-type" content="text/html; charset=utf-8">
+    <link href="font.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="stylesheet.css">
+    <meta http-equiv="refresh" content="1; URL=%3../../content.php?type=%4&id=%5">
+  </head>
+  <body style="background-color:black;color:#00ff00;font-family:Source Code Pro">Redirect...</body>
+</html>';
 
 # VARIABLES [POST]
 $userid=$_POST['userid'];
@@ -79,7 +44,7 @@ $site=$_POST['site'];
 $catsite=$_POST['catsite'];
 
 if($userid == ""){
-    $title='MainPage - A Free and Anonymous Social Network!';
+    $title='MainPage - A Free and Anonymous Social Network';
 }
 else
 {
@@ -91,17 +56,6 @@ if($site == '')
 if($catsite == '')
     $catsite=0;
 
-$host = "localhost";
-$benutzer = 'MAINPAGE';
-$passwort = 'MAINPAGE';
-$bindung = mysqli_connect($host, $benutzer, $passwort) or die("Connection is fuckin' broken.");
-$db = 'MAINPAGE';
-
-function mdq($bindung, $query)
-{
-    mysqli_select_db($bindung, 'MAINPAGE');
-    return mysqli_query($bindung, $query);
-}
 
 if($_POST['deletecookies'] == 1){
     foreach($_COOKIE AS $safeduser => $safedpasswd){
@@ -144,16 +98,30 @@ while ($row = mysqli_fetch_row($out)) {
     $out2 = mdq($bindung, $sql2);
     $sql2 = "DELETE FROM hearts WHERE user=$did;";
     $out2 = mdq($bindung, $sql2);
+    $sql3 = "DELETE FROM votings WHERE type=1 AND typeid=$did;";
+    $out3 = mdq($bindung, $sql3);
+    
     $sql2 = "SELECT id FROM blogs WHERE owner=$did;";
     $out2 = mdq($bindung, $sql2);
     while ($row2 = mysqli_fetch_row($out2)) {
-        $sql3 = "DELETE FROM blogposts WHERE blog=".$row2[0].";";
-        $out3 = mdq($bindung, $sql3);
         $sql3 = "DELETE FROM subscriptions WHERE blog=".$row2[0].";";
         $out3 = mdq($bindung, $sql3);
         $sql3 = "DELETE FROM votings WHERE type=0 AND typeid=".$row2[0].";";
         $out3 = mdq($bindung, $sql3);
+
+        $sql3 = "SELECT id FROM blogposts WHERE blog=".$row2[0].";";
+        $out3 = mdq($bindung, $sql3);
+        while ($row3 = mysqli_fetch_row($out3)) {
+            $sql4 = "DELETE FROM votings WHERE type=2 AND typeid=".$row3[0].";";
+            $out4 = mdq($bindung, $sql4);
+        }
+    
+        $sql3 = "DELETE FROM blogposts WHERE blog=".$row2[0].";";
+        $out3 = mdq($bindung, $sql3);
     }
+    
+    $sql3 = "DELETE FROM votings WHERE owner=$did;";
+    $out3 = mdq($bindung, $sql3);
     $sql2 = "DELETE FROM blogs WHERE owner=$did;";
     $out2 = mdq($bindung, $sql2);
     $sql2 = "DELETE FROM user WHERE id=$did;";
@@ -234,8 +202,6 @@ $(document).ready(function() {
 
 ";
 
-$URL=(isset($_SERVER['HTTPS']) && $_SERVER['HTTPS'] === 'on' ? "https" : "http") . "://".$_SERVER[HTTP_HOST].$_SERVER[REQUEST_URI];
-
 
 if(isset($_POST['createano'])){
     $stop=0;
@@ -249,6 +215,8 @@ if(isset($_POST['createano'])){
             $stop=0;
         }
     }
+
+    $out=shell_exec("mkdir content/$username;");
     
     $sql = "INSERT INTO user SET username='$username', password='$password', password_orig='$password', timeout=".time().";";
     $out = mdq($bindung, $sql);
@@ -272,6 +240,8 @@ if(isset($_POST['register'])){
             }
 
             if( $stop != 1 ){
+                $out=shell_exec("mkdir content/$username;");
+                    
                 $password_orig=md5($password);
                 $password=md5('#'.$password.'#');
                 $sql = "INSERT INTO user SET username='$username', password='$password', password_orig='$password_orig';";
@@ -422,7 +392,7 @@ But after an hour, all activity will be deleted.<p>
         $reportuser=$_POST['reportuser'];
 
         $reportdescription=$_POST['reportdescription'];
-        if($reportdescription == 'write description'){
+        if($reportdescription == 'Write description'){
             $reportdescription='';
         }
         
@@ -673,6 +643,10 @@ But after an hour, all activity will be deleted.<p>
                     setcookie($editusername, $password, time() + (86400 * 30 * 356), "/");
                 }
 
+                $out=shell_exec("mv content/$username/ content/$editusername/ 2>&1");
+
+                echo $out;
+                
                 $username=$editusername;
                 
                 $sql = "UPDATE user SET username='$username', password='$password', password_orig='$password_orig' WHERE id=$userid;";
@@ -713,6 +687,18 @@ But after an hour, all activity will be deleted.<p>
                 while ($row = mysqli_fetch_row($out)) {
                     $bloginsertid=$row[0];
                 }
+
+                # CREATE LINK
+                
+                $file=str_replace('%3', "../", $file);
+                $file=str_replace('%4', "0", $file);
+                $file=str_replace('%5', "$bloginsertid", $file);
+                                        
+                $out=shell_exec("mkdir content/$username/$createblog_name/");
+                $out=shell_exec("echo '$file' > content/$username/$createblog_name/index.html");
+                
+                # END create link
+                
                 $sql = "INSERT INTO subscriptions SET blog=$bloginsertid, user=0;";
                 $out = mdq($bindung, $sql);
                 $sql = "INSERT INTO blogposts SET title='', post='', blog=$bloginsertid;";
@@ -773,350 +759,13 @@ But after an hour, all activity will be deleted.<p>
                 }
                 
                 # [END] MISSING VARIABLES #
-                
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
-                #     START OF COPY [BLOGPOST]    #
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
 
                 $postid=$row2[0];
                 $title=$row2[1];
-
-                # POST EDIT
-                    
-                $post=umlaute($row2[2]);
-                $post=Parsedown::instance()
-                     ->setBreaksEnabled(true)
-                     ->text($post);
-                $post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $post);
-                $post=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $post);
-                $i=1000;
-                while ( $i > 0 ){
-                    $post=str_replace('[^'.$i.']:', "<a name='f_post{$postid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $post);
-                    $post=str_replace('[^'.$i.']', "<a href='#f_post{$postid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $post);
-                    $i--;
-                }
-
-                $origpost=dlt_doublebr(nl2br(dlt_html(umlaute($row2[2]))));
+                $SETTING['trenddesign']=1;
+                $SETTING['contentdesign']=0;
                 
-                # [END] POST EDIT
-
-                    
-                if($_POST['commentstat'] == $postid){
-                    $commentboxdisplay[$postid]='block';
-                    $commentarrow_stylechanges='transform:rotate(0deg);';
-                }
-                else{
-                    $commentboxdisplay[$postid]='none';
-                    $commentarrow_stylechanges='';
-                }
-
-                    
-                $date=$row2[3];
-                $votes=$row2[4];
-                $block='';
-                $sql = "SELECT vote FROM votes WHERE type_id=$postid AND type=0 AND user=$userid AND VOTE!=2;";
-                $out3 = mdq($bindung, $sql);
-                while ($row3 = mysqli_fetch_row($out3)) {
-                    if($row3[0] == 0)
-                        $block='border:1px solid #ff0000;';
-                    else
-                        $block='border:1px solid #00ff00;';
-                }
-                if($postid != ''){
-                    if($_POST['votefor'.$postid] != 0){
-                        $vote=$_POST['votefor'.$postid];
-                        if($block == ""){
-                            if($vote == -1){
-                                $vote=0;
-                                $votes--;
-                                $block='border:1px solid #ff0000;';
-                            }
-                            else{
-                                $votes++;
-                                $block='border:1px solid #00ff00;';
-                            }
-                                
-                            $sql = "INSERT INTO votes SET type_id=$postid, type_catid=$blogid, type=0, user=$userid, VOTE=$vote;";
-                            $out3 = mdq($bindung, $sql);
-                        }
-                    }
-
-                    # COMMENTS
-
-                    if(isset($_POST['comment'.$postid]) and $_POST['commenttext'.$postid] != "" and $_POST['commenttext'.$postid] != "write comment"){
-                        $_POST['commenttext'.$postid]=str_replace("'", "\'", $_POST['commenttext'.$postid]);
-                            
-                        $sql = "INSERT INTO comments SET user=$userid, content='".$_POST['commenttext'.$postid]."', type=0, type_id=$postid;";
-                        $out3 = mdq($bindung, $sql);
-
-                        $sql = "INSERT INTO hearts set user=-1, comment=LAST_INSERT_ID();";
-                        $out3 = mdq($bindung, $sql);                            
-                    }
-                        
-                    # [END] COMMENTS
-                        
-                    if($blogownerid == $userid)
-                        $block='TRUE';
-
-                    if($block != '')
-                        $style='cursor:default;';
-                    else
-                        $style='';
-                        
-                    echo "<input type='hidden' name='votefor$postid' id='votefor$postid' value='0'><div class='post' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(8%,8%,8%)';mousebtns$postid.style.display='block';bubbleview$postid.style.display='block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='#000000';mousebtns$postid.style.display='none';bubbleview$postid.style.display='none';\" style='margin-bottom:10px;'>
-
-<div style='float:left; cursor:pointer;' onmouseout=\"{$block}pnts$postid.style.display='block';{$block}voteup_$postid.style.display='none';{$block}votedown_$postid.style.display='none';\">
-<img src='DATA/vote_white.png' class='pnts_up' style='display:none' id='voteup_$postid' onclick=\"votefor$postid.value=1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_green.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
-<img src='DATA/vote_white.png' class='pnts_down' style='display:none' id='votedown_$postid' onclick=\"votefor$postid.value=-1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_red.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
-</div>
-
-<div class='pnts' style='$style$block' onmouseover=\"{$block}this.style.display='none';{$block}voteup_$postid.style.display='block';{$block}votedown_$postid.style.display='block';\" id='pnts$postid'>$votes</div>";
-
-                        echo "<span id='mousebtns$postid'></span>";
-
-                        $commentscount=0;
-                        $commentplural='s';
-                        $sql = "SELECT comments.id FROM comments WHERE type=0 AND type_id=$postid;";
-                        $out3 = mdq($bindung, $sql);
-                        while ($row3 = mysqli_fetch_row($out3)) {
-                            $commentscount++;
-                        }
-                        if($commentscount == 1){
-                            $commentplural='';
-                        }
-                        
-                        echo "<div class='absolutetopright secondtitle' $clickable_secondtitle onclick=\"site.value=4;catsite.value='blog#$blogid';gt_blogpost.value='{$blogid}_{$postid}';document.mainpage.submit();\">$blogname</div><div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogownername</span></span></div>
-
-<div class='postcontent'>
-<div style='display:none' id='textpost$postid'>
-$origpost
-</div>
-
-<div style='display:block;' id='htmlpost$postid'>
-$post
-</div>
-</div>
-&shy;
-<span class='greytxt grey right' $clickable_grey style='display:none;' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-view'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='source-view'; }\">source-view</span>
-
-<hr class='commentline'>
-<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
-<div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
-                        if($blogownerid != $userid){
-                            echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write comment</textarea>
-<input type='submit' name='comment$postid' value='send' class='btn commentsend' $clickable_btn>";
-                        }
-
-
-                            
-                        $commentin=0;
-                        $sql = "SELECT comments.content, user.username, user.id, comments.id, COUNT(CASE WHEN hearts.user!=-1 THEN 1 END) AS zahl FROM comments, user, hearts WHERE comments.user=user.id AND type=0 AND type_id=$postid AND hearts.comment=comments.id GROUP by comments.id ORDER by zahl desc, comments.id desc;";
-                        $out3 = mdq($bindung, $sql);
-                        while ($row3 = mysqli_fetch_row($out3)) {
-                            if($row3[2] != ''){
-                                $commentid=$row3[3];
-
-                                    
-                                $commenttext=Parsedown::instance()
-                                            ->setBreaksEnabled(true)
-                                            ->line(umlaute($row3[0]));
-                                    
-                                $commenttext=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $commenttext);
-                                $commenttext=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $commenttext);
-                                $i=1000;
-                                while ( $i > 0 ){
-                                    $commenttext=str_replace('[^'.$i.']:', "<a name='f_comment{$commentid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $commenttext);
-                                    $commenttext=str_replace('[^'.$i.']', "<a href='#f_comment{$commentid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $commenttext);
-                                    $i--;
-                                }
-
-                                    
-                                # REPLYS
-
-                                if($_POST['replystat'] == $commentid){
-                                    $replyboxdisplay[$commentid]='block';
-                                    $replyarrow_stylechanges='transform:rotate(0deg);';
-                                }
-                                else{
-                                    $replyboxdisplay[$commentid]='none';
-                                    $replyarrow_stylechanges='';
-                                }
-                                    
-                                if(isset($_POST['replysend'.$commentid]) and $_POST['replytext'.$commentid] != "" and $_POST['replytext'.$commentid] != "write reply"){
-                                    $_POST['replytext'.$commentid]=str_replace("'", "\'", $_POST['replytext'.$commentid]);
-                                        
-                                    $sql = "INSERT INTO comments SET user=$userid, content='".$_POST['replytext'.$commentid]."', type=1, type_id=$commentid;";
-                                    $out4 = mdq($bindung, $sql);
-                                }
-                                    
-                                # [END] REPLY
-
-                                    
-                                    
-                                if($_POST['heartcomment'] == $row3[3]){
-                                    $heart_in=0;
-                                    $sql = "SELECT id FROM hearts WHERE user=$userid AND comment=".$row3[3].";";
-                                    $out4 = mdq($bindung, $sql);
-                                    while ($row4 = mysqli_fetch_row($out4)) {
-                                        $heart_in=1;
-                                    }
-                                    if($heart_in != 1){
-                                        $sql = "INSERT INTO hearts SET comment=".$row3[3].", user=$userid;";
-                                        $out4 = mdq($bindung, $sql);
-                                        $row3[4]++;
-                                    }
-                                }
-                                    
-                                if($_POST['deletecomment'] == $row3[3] and $row3[2] == $userid){
-                                    $sql = "DELETE FROM comments WHERE id=".$row3[3].";";
-                                    $out4 = mdq($bindung, $sql);
-                                }else{
-
-                                    $replyscount=0;
-                                    $replyplural='ies';
-                                    $sql = "SELECT comments.id FROM comments WHERE type=1 AND type_id=$commentid;";
-                                    $out4 = mdq($bindung, $sql);
-                                    while ($row4 = mysqli_fetch_row($out4)) {
-                                        $replyscount++;
-                                    }
-                                    if($replyscount == 1){
-                                        $replyplural='y';
-                                    }
-                                    if($replyscount == 0){
-                                        $zeroreplysaddon='style="display:none;"';
-                                        $zeroreplysaddon2='reply';
-                                    }
-                                    else{
-                                        $zeroreplysaddon='';
-                                        $zeroreplysaddon2='';
-                                    }
-
-                                        
-                                    echo "<div class='post commentpost $zeroreplysaddon2' id='commentcontent$commentid' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='inline-block';mousebtns_2_{$postid}_".$row3[3].".style.display='inline-block';replys".$row3[3].".style.display='inline-block';replys2".$row3[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';mousebtns_2_{$postid}_".$row3[3].".style.display='none';replys".$row3[3].".style.display='none';replys2".$row3[3].".style.display='none';\">";
-
-                                    $full='';
-                                    $heartcursor='';
-
-                                    if($row3[2] != $userid){
-                                        $clickable_heart="onmouseover=\"this.style.backgroundColor='#ffffff';this.style.color='#000000';heart".$row3[3].".style.filter='invert(1)';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';heart".$row3[3].".style.filter='invert(0)';\"";
-                                    }
-                                    else{
-                                        $clickable_heart='';
-                                        $full='_full';
-                                        $heartcursor='cursor:default;';
-                                    }
-                                    
-                                    $sql = "SELECT id FROM hearts WHERE user=$userid AND comment=".$row3[3].";";
-                                    $out4 = mdq($bindung, $sql);
-                                    while ($row4 = mysqli_fetch_row($out4)) {
-                                        $clickable_heart='';
-                                        $full='_full';
-                                        $heartcursor='cursor:default;';
-                                    }
-                                                                        
-                                    echo "<div class='greytxt grey commentowner' $clickable_grey>".$row3[1]."</div>";
-
-                                    if($row3[2] == $userid){
-                                        echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_".$row3[3]."' onclick=\"deletecomment.value=".$row3[3].";document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
-                                    }
-                                    else{
-                                        echo "<span class='grey' style='display:none;font-size:14px;' id='replys2".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys".$row3[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();replyline$commentid.style.display='block';opencomments$commentid.style.display='block';commentcontent$commentid.classList.remove('reply');\" $clickable_grey>reply</div>
-<span id='mousebtns_2_{$postid}_".$row3[3]."'></span><span id='mousebtns{$postid}_".$row3[3]."'></span>";
-                                    }
-
-                                    echo "<div class='commentbox'>".$commenttext."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-3px;width:16px;'></div>";
-
-                                    ### <------- REPLYS -------> ##
-                                        
-                                    echo "<hr class='commentline' id='replyline$commentid' $zeroreplysaddon><div class='opencomments' id='opencomments$commentid' $zeroreplysaddon $clickable_txt 
-
-onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';}else{replystat.value='0';replycontent$commentid.style.display='none';reply_einklappen$commentid.style.transform='rotate(180deg)';}\"
-
-><img src='DATA/einklappen.png' class='einklappen' id='reply_einklappen$commentid' style='$replyarrow_stylechanges'>$replyscount repl$replyplural</div><div class='comments' id='replycontent$commentid' style='display:".$replyboxdisplay[$commentid]."'>";
-                                        
-                                    echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>Write reply</textarea>
-<input type='submit' name='replysend$commentid' value='send' class='btn commentsend' $clickable_btn>";
-                                        
-                                        
-                                    $replyin=0;
-                                    $sql = "SELECT comments.content, user.username, user.id, comments.id FROM comments, user WHERE comments.user=user.id AND comments.type=1 AND comments.type_id=$commentid ORDER by comments.id;";
-                                    $out4 = mdq($bindung, $sql);
-                                    while ($row4 = mysqli_fetch_row($out4)) {
-                                        if($row4[3] != ''){
-                                            $replyid=$row4[3];
-
-                                            $replytext=Parsedown::instance()
-                                                      ->setBreaksEnabled(true)
-                                                      ->line(umlaute($row4[0]));
-                                                
-                                            $replytext=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $replytext);
-                                            $replytext=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $replytext);
-                                            $i=1000;
-                                            while ( $i > 0 ){
-                                                $replytext=str_replace('[^'.$i.']:', "<a name='f_reply{$replyid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $replytext);
-                                                $replytext=str_replace('[^'.$i.']', "<a href='#f_reply{$replyid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $replytext);
-                                                $i--;
-                                            }
-
-                                                
-                                            if($_POST['deletecomment'] == 'reply'.$row4[3] and $row4[2] == $userid){
-                                                $sql = "DELETE FROM comments WHERE id=".$row4[3].";";
-                                                $out5 = mdq($bindung, $sql);
-                                            }else{
-                                                    
-                                                echo "<div class='post commentpost reply' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(24%,24%,24%)';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';replys{$commentid}_".$row4[3].".style.display='inline-block';replys2{$commentid}_".$row4[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='none';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='none';replys{$commentid}_".$row4[3].".style.display='none';replys2{$commentid}_".$row4[3].".style.display='none';\">";
-                                                    
-                                                    
-                                                echo "<div class='greytxt grey commentowner' $clickable_grey>".$row4[1]."</div>";
-                                                    
-                                                if($row4[2] == $userid){
-                                                    echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_{$commentid}_".$row4[3]."' onclick=\"deletecomment.value='reply".$row4[3]."';document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
-                                                }
-                                                else{
-                                                    echo "<span class='grey' style='display:none;font-size:14px;' id='replys2{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys{$commentid}_".$row4[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();\" $clickable_grey>reply</div>
-<span id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'></span><span id='mousebtns{$postid}_{$commentid}_".$row4[3]."'></span>";
-                                                }
-
-                                                echo "<div class='commentbox'>".$replytext."</div></div>";
-                                                $replyin=1;
-                                            }                                        
-                                        }
-                                    }
-
-                                    if($replyin == 0){
-                                        echo "<center style='padding-bottom:15px;'>=== NO REPLYS ===</center>";
-                                    }
-
-                                        
-                                    echo "</div>";
-                                        
-                                    ### <--END-- REPLYS -------> ##
-                                        
-                                    echo "</div>";
-                                        
-                                    $commentin=1;
-                                }
-                            }
-                        }
-                        if($commentin == 0){
-                            echo "<center style='padding-bottom:30px;'>=== NO COMMENTS ===</center>";
-                        }
-                            
-                        echo "</div></div>";
-                            
-                        if($firstpost == $postid){
-                            echo "<hr class='firstpostline'>";
-                        }
-                            
-                            
-                            
-                        $in=1;
-                        
-                }
-
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
-                #           END OF COPY           #
-                # !!!!!!!!!!!!!!!!!!!!!!!!!!!!!!! #
+                include("CODEBLOCKS/blogpost.php");
                 
             }
 
@@ -1450,8 +1099,22 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             $sql = "INSERT INTO blogposts SET title='$newpost_title', post='$newpost_text', blog=$blogid, time=".time().", date='".date("d.m.Y h:i A")."';";
             $out = mdq($bindung, $sql);
 
+            $sql = "SELECT LAST_INSERT_ID(), blogs.name FROM blogs, blogposts WHERE blogs.id=blogposts.blog AND blogposts.id=LAST_INSERT_ID();";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $blogpostid=$row[0];
+                $blogname=$row[1];
+            }
+            
             $sql = "INSERT INTO votes SET vote=2, type=0, type_id=LAST_INSERT_ID(), user=$userid, type_catid=$blogid;";
             $out = mdq($bindung, $sql);
+
+            $file=str_replace('%3', "../", $file);
+            $file=str_replace('%4', "1", $file);
+            $file=str_replace('%5', "$blogpostid", $file);
+            
+            $out=shell_exec("echo '$file' > content/$username/$blogname/".str_replace(' ', '_', $newpost_title).";");
+                
         }
 
         if($_POST['deleteblogpost'] != 0){
@@ -1477,6 +1140,13 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                 $editpost_title=str_replace("'", "\'", $_POST['editpost_title']);
                 $editpost_text=str_replace("'", "\'", $_POST['editpost_text']);
                 $editblogpostid=$_POST['editblogpostid'];
+
+                $sql = "SELECT blogposts.title, blogs.name FROM blogposts, blogs WHERE blogs.id=blogposts.blog AND blogposts.id=$editblogpostid;";
+                $out = mdq($bindung, $sql);
+                while ($row = mysqli_fetch_row($out)) {
+                    $out2=shell_exec("mv content/$username/".$row[1]."/".str_replace(' ', '_', $row[0])." content/$username/".$row[1]."/".str_replace(' ', '_', $editpost_title)."");
+                }
+                
                 
                 $sql = "UPDATE blogposts SET title='$editpost_title', post='$editpost_text' WHERE id=$editblogpostid;";
                 $out = mdq($bindung, $sql);
@@ -1501,7 +1171,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
 </div>";
                 }
                 
-                echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid'><div class='title'><span class='white'>></span> $blogname <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogowner</span></span></div>";
+                echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid'><div class='title'><span class='white'>></span> $blogname<img src='DATA/link.png' title='$URL_domain/content/$blogowner/$blogname' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname';\"> <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogowner</span></span></div>";
                 if($blogownerid == $userid){
                     echo "<div class='rightbtn' $clickable_btn onclick=\"newpost$blogid.style.display='block';blog$blogid.style.display='none';\">New post</div>";
                 }
@@ -1536,348 +1206,12 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                 while ($row2 = mysqli_fetch_row($out2)) {
                     $postid=$row2[0];
                     $title=$row2[1];
-
-                    # POST EDIT
                     
-                    $post=umlaute($row2[2]);
-                    $post=Parsedown::instance()
-                         ->setBreaksEnabled(true)
-                         ->text($post);
-                    $post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $post);
-                    $post=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $post);
-                    $i=1000;
-                    while ( $i > 0 ){
-                        $post=str_replace('[^'.$i.']:', "<a name='f_post{$postid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $post);
-                        $post=str_replace('[^'.$i.']', "<a href='#f_post{$postid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $post);
-                        $i--;
-                    }
-
-                    $origpost=dlt_doublebr(nl2br(dlt_html(umlaute($row2[2]))));
+                    $SETTING['trenddesign']=0;
+                    $SETTING['contentdesign']=0;
                     
-                    # [END] POST EDIT
-
+                    include("CODEBLOCKS/blogpost.php");
                     
-                    if($_POST['commentstat'] == $postid){
-                        $commentboxdisplay[$postid]='block';
-                        $commentarrow_stylechanges='transform:rotate(0deg);';
-                    }
-                    else{
-                        $commentboxdisplay[$postid]='none';
-                        $commentarrow_stylechanges='';
-                    }
-
-                    
-                    $date=$row2[3];
-                    $votes=$row2[4];
-                    $block='';
-                    $sql = "SELECT vote FROM votes WHERE type_id=$postid AND type=0 AND user=$userid AND VOTE!=2;";
-                    $out3 = mdq($bindung, $sql);
-                    while ($row3 = mysqli_fetch_row($out3)) {
-                        if($row3[0] == 0)
-                            $block='border:1px solid #ff0000;';
-                        else
-                            $block='border:1px solid #00ff00;';
-                    }
-                    if($postid != ''){
-                        if($_POST['votefor'.$postid] != 0){
-                            $vote=$_POST['votefor'.$postid];
-                            if($block == ""){
-                                if($vote == -1){
-                                    $vote=0;
-                                    $votes--;
-                                    $block='border:1px solid #ff0000;';
-                                }
-                                else{
-                                    $votes++;
-                                    $block='border:1px solid #00ff00;';
-                                }
-                                
-                                $sql = "INSERT INTO votes SET type_id=$postid, type_catid=$blogid, type=0, user=$userid, VOTE=$vote;";
-                                $out3 = mdq($bindung, $sql);
-                            }
-                        }
-
-                        # COMMENTS
-
-                        if(isset($_POST['comment'.$postid]) and $_POST['commenttext'.$postid] != "" and $_POST['commenttext'.$postid] != "write comment"){
-                            $_POST['commenttext'.$postid]=str_replace("'", "\'", $_POST['commenttext'.$postid]);
-                            
-                            $sql = "INSERT INTO comments SET user=$userid, content='".$_POST['commenttext'.$postid]."', type=0, type_id=$postid;";
-                            $out3 = mdq($bindung, $sql);
-
-                            $sql = "INSERT INTO hearts set user=-1, comment=LAST_INSERT_ID();";
-                            $out3 = mdq($bindung, $sql);                            
-                        }
-                        
-                        # [END] COMMENTS
-                        
-                        if($blogownerid == $userid)
-                            $block='TRUE';
-
-                        if($block != '')
-                            $style='cursor:default;';
-                        else
-                            $style='';
-                        
-                        echo "<input type='hidden' name='votefor$postid' id='votefor$postid' value='0'><div class='post' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(8%,8%,8%)';mousebtns$postid.style.display='block';bubbleview$postid.style.display='block';bubbleview2_$postid.style.display='block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='#000000';mousebtns$postid.style.display='none';bubbleview$postid.style.display='none';bubbleview2_$postid.style.display='none';\">
-
-<div style='float:left; cursor:pointer;' onmouseout=\"{$block}pnts$postid.style.display='block';{$block}voteup_$postid.style.display='none';{$block}votedown_$postid.style.display='none';\">
-<img src='DATA/vote_white.png' class='pnts_up' style='display:none' id='voteup_$postid' onclick=\"votefor$postid.value=1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_green.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
-<img src='DATA/vote_white.png' class='pnts_down' style='display:none' id='votedown_$postid' onclick=\"votefor$postid.value=-1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_red.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
-</div>
-
-<div class='pnts' style='$style$block' onmouseover=\"{$block}this.style.display='none';{$block}voteup_$postid.style.display='block';{$block}votedown_$postid.style.display='block';\" id='pnts$postid'>$votes</div>";
-
-                        if($blogownerid == $userid){
-                            echo "<div id='mousebtns$postid' style='display:none'><span class='grey greytxt right' onclick=\"deleteblogpost.value=$postid;document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</span><span class='grey greytxt right' onclick=\"editblogpost.value=$postid;document.mainpage.submit();\" $clickable_grey>edit</span></div>
-
-<span id='TRUEthis'></span><span id='TRUEvoteup_$postid'></span><span id='TRUEvotedown_$postid'></span><span id='TRUEpnts$postid'></span>";
-                        }
-                        else{
-                            echo "<span id='mousebtns$postid'></span>";
-                            echo "<span class='right grey greytxt' id='bubbleview2_$postid' onclick=\"catsite.value='report#blogpost:$postid';document.mainpage.submit();\" ".str_replace('#00ff00', '#ff0000', $clickable_grey)." style='display:none'>report</span>";
-
-                        }
-
-                        $commentscount=0;
-                        $commentplural='s';
-                        $sql = "SELECT comments.id FROM comments WHERE type=0 AND type_id=$postid;";
-                        $out3 = mdq($bindung, $sql);
-                        while ($row3 = mysqli_fetch_row($out3)) {
-                            $commentscount++;
-                        }
-                        if($commentscount == 1){
-                            $commentplural='';
-                        }
-                        
-                        echo "<div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title</div>
-
-<div class='postcontent'>
-<div style='display:none' id='textpost$postid'>
-$origpost
-</div>
-
-<div style='display:block;' id='htmlpost$postid'>
-$post
-</div>
-</div>
-&shy;
-<span class='greytxt grey right' $clickable_grey style='display:none;' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-view'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='source-view'; }\">source-view</span>
-
-<hr class='commentline'>
-<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
-<div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
-                            if($blogownerid != $userid){
-                                echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write comment</textarea>
-<input type='submit' name='comment$postid' value='send' class='btn commentsend' $clickable_btn>";
-                            }
-
-
-                            
-                            $commentin=0;
-                            $sql = "SELECT comments.content, user.username, user.id, comments.id, COUNT(CASE WHEN hearts.user!=-1 THEN 1 END) AS zahl FROM comments, user, hearts WHERE comments.user=user.id AND type=0 AND type_id=$postid AND hearts.comment=comments.id GROUP by comments.id ORDER by zahl desc, comments.id desc;";
-                            $out3 = mdq($bindung, $sql);
-                            while ($row3 = mysqli_fetch_row($out3)) {
-                                if($row3[2] != ''){
-                                    $commentid=$row3[3];
-
-                                    
-                                    $commenttext=Parsedown::instance()
-                                        ->setBreaksEnabled(true)
-                                        ->line(umlaute($row3[0]));
-                                    
-                                    $commenttext=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $commenttext);
-                                    $commenttext=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $commenttext);
-                                    $i=1000;
-                                    while ( $i > 0 ){
-                                        $commenttext=str_replace('[^'.$i.']:', "<a name='f_comment{$commentid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $commenttext);
-                                        $commenttext=str_replace('[^'.$i.']', "<a href='#f_comment{$commentid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $commenttext);
-                                        $i--;
-                                    }
-
-                                    
-                                    # REPLYS
-
-                                    if($_POST['replystat'] == $commentid){
-                                        $replyboxdisplay[$commentid]='block';
-                                        $replyarrow_stylechanges='transform:rotate(0deg);';
-                                    }
-                                    else{
-                                        $replyboxdisplay[$commentid]='none';
-                                        $replyarrow_stylechanges='';
-                                    }
-                                    
-                                    if(isset($_POST['replysend'.$commentid]) and $_POST['replytext'.$commentid] != "" and $_POST['replytext'.$commentid] != "write reply"){
-                                        $_POST['replytext'.$commentid]=str_replace("'", "\'", $_POST['replytext'.$commentid]);
-                                        
-                                        $sql = "INSERT INTO comments SET user=$userid, content='".$_POST['replytext'.$commentid]."', type=1, type_id=$commentid;";
-                                        $out4 = mdq($bindung, $sql);
-                                    }
-                                    
-                                    # [END] REPLY
-
-                                    
-                                    
-                                    if($_POST['heartcomment'] == $row3[3]){
-                                        $heart_in=0;
-                                        $sql = "SELECT id FROM hearts WHERE user=$userid AND comment=".$row3[3].";";
-                                        $out4 = mdq($bindung, $sql);
-                                        while ($row4 = mysqli_fetch_row($out4)) {
-                                            $heart_in=1;
-                                        }
-                                        if($heart_in != 1){
-                                            $sql = "INSERT INTO hearts SET comment=".$row3[3].", user=$userid;";
-                                            $out4 = mdq($bindung, $sql);
-                                            $row3[4]++;
-                                        }
-                                    }
-                                    
-                                    if($_POST['deletecomment'] == $row3[3] and $row3[2] == $userid){
-                                        $sql = "DELETE FROM comments WHERE id=".$row3[3].";";
-                                        $out4 = mdq($bindung, $sql);
-                                    }else{
-
-                                        $replyscount=0;
-                                        $replyplural='ies';
-                                        $sql = "SELECT comments.id FROM comments WHERE type=1 AND type_id=$commentid;";
-                                        $out4 = mdq($bindung, $sql);
-                                        while ($row4 = mysqli_fetch_row($out4)) {
-                                            $replyscount++;
-                                        }
-                                        if($replyscount == 1){
-                                            $replyplural='y';
-                                        }
-                                        if($replyscount == 0){
-                                            $zeroreplysaddon='style="display:none;"';
-                                            $zeroreplysaddon2='reply';
-                                        }
-                                        else{
-                                            $zeroreplysaddon='';
-                                            $zeroreplysaddon2='';
-                                        }
-
-                                        
-                                        echo "<div class='post commentpost $zeroreplysaddon2' id='commentcontent$commentid' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(16%,16%,16%)';mousebtns{$postid}_".$row3[3].".style.display='inline-block';mousebtns_2_{$postid}_".$row3[3].".style.display='inline-block';replys".$row3[3].".style.display='inline-block';replys2".$row3[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_".$row3[3].".style.display='none';mousebtns_2_{$postid}_".$row3[3].".style.display='none';replys".$row3[3].".style.display='none';replys2".$row3[3].".style.display='none';\">";
-
-                                        $full='';
-                                        $heartcursor='';
-
-                                        if($row3[2] != $userid){
-                                            $clickable_heart="onmouseover=\"this.style.backgroundColor='#ffffff';this.style.color='#000000';heart".$row3[3].".style.filter='invert(1)';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';heart".$row3[3].".style.filter='invert(0)';\"";
-                                        }
-                                        else{
-                                            $clickable_heart='';
-                                            $full='_full';
-                                            $heartcursor='cursor:default;';
-                                        }
-                                    
-                                        $sql = "SELECT id FROM hearts WHERE user=$userid AND comment=".$row3[3].";";
-                                        $out4 = mdq($bindung, $sql);
-                                        while ($row4 = mysqli_fetch_row($out4)) {
-                                            $clickable_heart='';
-                                            $full='_full';
-                                            $heartcursor='cursor:default;';
-                                        }
-                                                                        
-                                        echo "<div class='greytxt grey commentowner' $clickable_grey>".$row3[1]."</div>";
-
-                                        if($row3[2] == $userid){
-                                            echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_".$row3[3]."' onclick=\"deletecomment.value=".$row3[3].";document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
-                                        }
-                                        else{
-                                            echo "<span class='grey' style='display:none;font-size:14px;' id='replys2".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys".$row3[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();replyline$commentid.style.display='block';opencomments$commentid.style.display='block';commentcontent$commentid.classList.remove('reply');\" $clickable_grey>reply</div>
-<span id='mousebtns_2_{$postid}_".$row3[3]."'></span><span id='mousebtns{$postid}_".$row3[3]."'></span>";
-                                        }
-
-                                        echo "<div class='commentbox'>".$commenttext."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-3px;width:16px;'></div>";
-
-                                        ### <------- REPLYS -------> ##
-                                        
-                                        echo "<hr class='commentline' id='replyline$commentid' $zeroreplysaddon><div class='opencomments' id='opencomments$commentid' $zeroreplysaddon $clickable_txt 
-
-onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';}else{replystat.value='0';replycontent$commentid.style.display='none';reply_einklappen$commentid.style.transform='rotate(180deg)';}\"
-
-><img src='DATA/einklappen.png' class='einklappen' id='reply_einklappen$commentid' style='$replyarrow_stylechanges'>$replyscount repl$replyplural</div><div class='comments' id='replycontent$commentid' style='display:".$replyboxdisplay[$commentid]."'>";
-                                        
-                                        echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>Write reply</textarea>
-<input type='submit' name='replysend$commentid' value='send' class='btn commentsend' $clickable_btn>";
-                                        
-                                        
-                                        $replyin=0;
-                                        $sql = "SELECT comments.content, user.username, user.id, comments.id FROM comments, user WHERE comments.user=user.id AND comments.type=1 AND comments.type_id=$commentid ORDER by comments.id;";
-                                        $out4 = mdq($bindung, $sql);
-                                        while ($row4 = mysqli_fetch_row($out4)) {
-                                        if($row4[3] != ''){
-                                                $replyid=$row4[3];
-
-                                                $replytext=Parsedown::instance()
-                                                            ->setBreaksEnabled(true)
-                                                            ->line(umlaute($row4[0]));
-                                                
-                                                $replytext=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $replytext);
-                                                $replytext=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $replytext);
-                                                $i=1000;
-                                                while ( $i > 0 ){
-                                                    $replytext=str_replace('[^'.$i.']:', "<a name='f_reply{$replyid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $replytext);
-                                                    $replytext=str_replace('[^'.$i.']', "<a href='#f_reply{$replyid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $replytext);
-                                                    $i--;
-                                                }
-
-                                                
-                                                if($_POST['deletecomment'] == 'reply'.$row4[3] and $row4[2] == $userid){
-                                                    $sql = "DELETE FROM comments WHERE id=".$row4[3].";";
-                                                    $out5 = mdq($bindung, $sql);
-                                                }else{
-                                                    
-                                                    echo "<div class='post commentpost reply' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(24%,24%,24%)';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';replys{$commentid}_".$row4[3].".style.display='inline-block';replys2{$commentid}_".$row4[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='none';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='none';replys{$commentid}_".$row4[3].".style.display='none';replys2{$commentid}_".$row4[3].".style.display='none';\">";
-                                                    
-                                                    
-                                                    echo "<div class='greytxt grey commentowner' $clickable_grey>".$row4[1]."</div>";
-                                                    
-                                                    if($row4[2] == $userid){
-                                                        echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_{$commentid}_".$row4[3]."' onclick=\"deletecomment.value='reply".$row4[3]."';document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
-                                                    }
-                                                    else{
-                                                        echo "<span class='grey' style='display:none;font-size:14px;' id='replys2{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys{$commentid}_".$row4[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();\" $clickable_grey>reply</div>
-<span id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'></span><span id='mousebtns{$postid}_{$commentid}_".$row4[3]."'></span>";
-                                                    }
-
-                                                    echo "<div class='commentbox'>".$replytext."</div></div>";
-                                                    $replyin=1;
-                                                }                                        
-                                            }
-                                        }
-
-                                        if($replyin == 0){
-                                            echo "<center style='padding-bottom:15px;'>=== NO REPLYS ===</center>";
-                                        }
-
-                                        
-                                        echo "</div>";
-                                        
-                                        ### <--END-- REPLYS -------> ##
-                                        
-                                        echo "</div>";
-                                        
-                                        $commentin=1;
-                                    }
-                                }
-                            }
-                            if($commentin == 0){
-                                echo "<center style='padding-bottom:30px;'>=== NO COMMENTS ===</center>";
-                            }
-                            
-                            echo "</div></div>";
-                            
-                            if($firstpost == $postid){
-                                echo "<hr class='firstpostline'>";
-                            }
-                            
-                            
-                            
-                            $in=1;
-                            
-                    }
                 }
             
                 if($in == 0)
@@ -1989,6 +1323,8 @@ Post already reported. See Votings.<p>
 }
 
 echo "
+<div id='copymessage' style='display:none;' onclick=\"this.style.display='none';\"><div id='copyfield' onclick=\"event.stopPropagation();\"></div></div>
+
 <input type='hidden' name='gt_blogpost' id='gt_blogpost' value='".$_POST['gt_blogpost']."'>
 <input type='hidden' name='votebackbtn' id='votebackbtn' value='0'>
 <input type='hidden' name='catsite' id='catsite' value='$catsite'>
