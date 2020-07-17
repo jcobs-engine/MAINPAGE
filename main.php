@@ -28,7 +28,7 @@ $file='<html>
     <link rel="shortcut icon" type="image/x-icon" href="DATA/icon.ico">
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link href="font.css" rel="stylesheet">
+    <link href="%3../../font.css" rel="stylesheet">
     <link rel="stylesheet" type="text/css" href="stylesheet.css">
     <meta http-equiv="refresh" content="1; URL=%3../../content.php?type=%4&id=%5">
   </head>
@@ -1115,7 +1115,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             $file=str_replace('%4', "1", $file);
             $file=str_replace('%5', "$blogpostid", $file);
             
-            $out=shell_exec("echo '$file' > content/$username/$blogname/".str_replace(' ', '_', $newpost_title).";");
+            $out=shell_exec("echo '$file' > content/$username/$blogname/".setfilename($newpost_title).";");
                 
         }
 
@@ -1146,7 +1146,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                 $sql = "SELECT blogposts.title, blogs.name FROM blogposts, blogs WHERE blogs.id=blogposts.blog AND blogposts.id=$editblogpostid;";
                 $out = mdq($bindung, $sql);
                 while ($row = mysqli_fetch_row($out)) {
-                    $out2=shell_exec("mv content/$username/".$row[1]."/".str_replace(' ', '_', $row[0])." content/$username/".$row[1]."/".str_replace(' ', '_', $editpost_title)."");
+                    $out2=shell_exec("mv content/$username/".$row[1]."/".setfilename($row[0])." content/$username/".$row[1]."/".setfilename($editpost_title)."");
                 }
                 
                 
