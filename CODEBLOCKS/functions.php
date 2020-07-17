@@ -4,6 +4,12 @@ date_default_timezone_set('UTC');
 
 include('Parsedown.php');
 
+function setfilename($post){
+    $post=preg_replace("/[^0-9a-zA-Z \-\_]/", "", $post);
+    $post=str_replace(' ', '_', $post);
+    return $post;
+}
+
 function umlaute($post){
     $post=trim(preg_replace('/\t/', ' ', $post));
     $post=str_replace('ä', '&auml;', $post);
