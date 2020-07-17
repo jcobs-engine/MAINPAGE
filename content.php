@@ -69,8 +69,15 @@ $(document).ready(function() {
 
 <body>
 
-<a href='$URL_domain'><img id='login_logo' src='DATA/logo_$version.png' onmouseover=\"this.src='DATA/greenlogo_$version.png';\" onmouseout=\"this.src='DATA/logo_$version.png';\"></a>
+<div id='header'> 
+<a href='$URL_domain'><img class='logo clickable' src='DATA/logo_$version.png' onmouseover=\"this.src='DATA/greenlogo_$version.png';\" onmouseout=\"this.src='DATA/logo_$version.png';\"></a>
+<a href='$URL_domain' class='white'><div class='header_child' ".$clickable_txt."><span style='border-bottom:0px solid #00ff00'>Join</span></div></a>
+</div>
+
+<div style='height:200px;'></div>                                                                                                                                                             
+
 ";
+#<a href='$URL_domain'><img id='login_logo' src='DATA/logo_$version.png' onmouseover=\"this.src='DATA/greenlogo_$version.png';\" onmouseout=\"this.src='DATA/logo_$version.png';\"></a>
 
 
 # BLOG #
