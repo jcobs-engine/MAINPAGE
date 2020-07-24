@@ -25,12 +25,12 @@ $file='<html>
 				      votings. Be a part of the community!">
     <meta name="keywords" content="mainpage, social network, network, anonymous,
 				   community, blogs, blog, forum, forums, chat, chats, votings">
-    <link rel="shortcut icon" type="image/x-icon" href="DATA/icon.ico">
+    <link rel="shortcut icon" type="image/x-icon" href="/DATA/icon.ico">
     <meta charset="utf-8">
     <meta http-equiv="content-type" content="text/html; charset=utf-8">
-    <link href="%3../../font.css" rel="stylesheet">
-    <link rel="stylesheet" type="text/css" href="stylesheet.css">
-    <meta http-equiv="refresh" content="1; URL=%3../../content.php?type=%4&id=%5">
+    <link href="/font.css" rel="stylesheet">
+    <link rel="stylesheet" type="text/css" href="/stylesheet.css">
+    <meta http-equiv="refresh" content="1; URL=/content.php?type=%4&id=%5">
   </head>
   <body style="background-color:black;color:#00ff00;font-family:Source Code Pro">Redirect...</body>
 </html>';
@@ -71,7 +71,7 @@ if($password == 'NONE'){
     while ($row = mysqli_fetch_row($out)) {
         $sec=($row[0]+(60*60))-time();
         $timeout=sprintf('%02d:%02d:%02d', ($sec/3600),($sec/60%60), $sec%60);
-        $bodyaddon='onload="setTimeout( function(){ document.mainpage.submit(); }, '.($sec+1).'000 );"';
+        $bodyaddon='setTimeout( function(){ document.mainpage.submit(); }, '.($sec+1).'000 );';
         if($sec <= 0){
             $userid='';
             $username='';
@@ -80,6 +80,13 @@ if($password == 'NONE'){
     }
 }
 
+if(isset($_POST['editpubkey'])){
+    $bodyaddon.="kd".$_POST['editpubkey_kd'].".click();";
+}
+
+if(isset($_POST['editdescription'])){
+    $bodyaddon.="kd".$_POST['editdescription_kd'].".click();";
+}
 
 ### DELETING BY TIMESTAMP ###
 
@@ -100,11 +107,13 @@ while ($row = mysqli_fetch_row($out)) {
     $out2 = mdq($bindung, $sql2);
     $sql3 = "DELETE FROM votings WHERE type=1 AND typeid=$did;";
     $out3 = mdq($bindung, $sql3);
+    $sql3 = "DELETE FROM subscriptions WHERE type=1 AND type_id=$did;";
+    $out3 = mdq($bindung, $sql3);
     
     $sql2 = "SELECT id FROM blogs WHERE owner=$did;";
     $out2 = mdq($bindung, $sql2);
     while ($row2 = mysqli_fetch_row($out2)) {
-        $sql3 = "DELETE FROM subscriptions WHERE blog=".$row2[0].";";
+        $sql3 = "DELETE FROM subscriptions WHERE type=0 AND type_id=".$row2[0].";";
         $out3 = mdq($bindung, $sql3);
         $sql3 = "DELETE FROM votings WHERE type=0 AND typeid=".$row2[0].";";
         $out3 = mdq($bindung, $sql3);
@@ -128,7 +137,7 @@ while ($row = mysqli_fetch_row($out)) {
     $out2 = mdq($bindung, $sql2);
 }    
 
-$sql = "SELECT id, type, typeid FROM votings WHERE time+60*60*48-".time()."<=0;";
+$sql = "SELECT id, type, typeid FROM votings WHERE time+60*60*24-".time()."<=0;";
 $out = mdq($bindung, $sql);
 while ($row = mysqli_fetch_row($out)) {
     $provote=0;
@@ -146,12 +155,42 @@ while ($row = mysqli_fetch_row($out)) {
 
     if( $provote > $contravote ){
         if($row[1] == 0){
+            $sql = "SELECT id FROM blogposts WHERE blog=".$row[2].";";
+            $out2 = mdq($bindung, $sql);
+            while ($row2 = mysqli_fetch_row($out2)) {
+                $sql = "DELETE FROM votings WHERE type=2 AND typeid=".$row2[0].";";
+                $out3 = mdq($bindung, $sql);
+            }
+            
             $sql = "DELETE FROM blogs WHERE id=".$row[2].";";
+            $out2 = mdq($bindung, $sql);
+
+            $sql = "DELETE FROM blogposts WHERE blog=".$row[2].";";
             $out2 = mdq($bindung, $sql);
         }
         elseif($row[1] == 1){
             $sql = "DELETE FROM user WHERE id=".$row[2].";";
             $out2 = mdq($bindung, $sql);
+
+            $sql = "SELECT id FROM blogs WHERE owner=".$row[2].";";
+            $out2 = mdq($bindung, $sql);
+            while ($row2 = mysqli_fetch_row($out2)) {
+                $sql = "SELECT id FROM blogposts WHERE blog=".$row2[0].";";
+                $out3 = mdq($bindung, $sql);
+                while ($row3 = mysqli_fetch_row($out3)) {
+                    $sql = "DELETE FROM votings WHERE type=2 AND typeid=".$row3[0].";";
+                    $out4 = mdq($bindung, $sql);
+                }
+                $sql = "DELETE FROM blogposts WHERE blog=".$row2[0].";";
+                $out3 = mdq($bindung, $sql);
+                
+                $sql = "DELETE FROM votings WHERE type=0 AND typeid=".$row2[0].";";
+                $out3 = mdq($bindung, $sql);
+            }
+            
+            $sql = "DELETE FROM blogs WHERE owner=".$row[2].";";
+            $out2 = mdq($bindung, $sql);
+            
         }
         elseif($row[1] == 2){
             $sql = "DELETE FROM blogposts WHERE id=".$row[2].";";
@@ -176,10 +215,10 @@ echo "<!DOCTYPE html>
 <meta charset='utf-8'>
 <meta http-equiv='content-type' content='text/html; charset=utf-8'>
 
-<script src='jquery.min.js'></script>
-<link href='font.css' rel='stylesheet'>
-<link rel='stylesheet' type='text/css' href='stylesheet.css'>
-<link rel='shortcut icon' type='image/x-icon' href='DATA/icon.ico'>
+<script src='/jquery.min.js'></script>
+<link href='/font.css' rel='stylesheet'>
+<link rel='stylesheet' type='text/css' href='/stylesheet.css'>
+<link rel='shortcut icon' type='image/x-icon' href='/DATA/icon.ico'>
 
 <script>
 $(window).scroll(function() {
@@ -195,7 +234,7 @@ $(document).ready(function() {
 
 </head>
 
-<body $bodyaddon>
+<body onload=\"$bodyaddon\">
 <form autocomplete='off' name='mainpage' id='mainpage' method='POST' action='main.php'>
 <!-- Prevent implicit submission of the form -->
 <button type='submit' disabled style='display: none' aria-hidden='true'></button>
@@ -215,14 +254,27 @@ if(isset($_POST['createano'])){
             $stop=0;
         }
     }
-
-    $out=shell_exec("mkdir content/$username;");
     
     $sql = "INSERT INTO user SET username='$username', password='$password', password_orig='$password', timeout=".time().";";
     $out = mdq($bindung, $sql);
+
+    $sql = "SELECT LAST_INSERT_ID();";
+    $out = mdq($bindung, $sql);
+    while ($row = mysqli_fetch_row($out)) {
+        $lastinsertid=$row[0];
+    }
+
+    $file=str_replace('%4', "2", $file);
+    $file=str_replace('%5', "$lastinsertid", $file);
+    
+    $out=shell_exec("mkdir content/$username;");
+    $out=shell_exec("echo '$file' > content/$username/index.html");
+
+    $sql = "INSERT INTO subscriptions SET user=0, type=1, type_id=$lastinsertid;";
+    $out = mdq($bindung, $sql);
     $sec=(time()+(60*60))-time();
     $timeout=sprintf('%02d:%02d:%02d', ($sec/3600),($sec/60%60), $sec%60);
-    $bodyaddon='onload="setTimeout( function(){ document.mainpage.submit(); }, '.($sec+1).'000 );"';
+    $bodyaddon='setTimeout( function(){ document.mainpage.submit(); }, '.($sec+1).'000 );';
 }
 
 
@@ -245,6 +297,21 @@ if(isset($_POST['register'])){
                 $password_orig=md5($password);
                 $password=md5('#'.$password.'#');
                 $sql = "INSERT INTO user SET username='$username', password='$password', password_orig='$password_orig';";
+                $out = mdq($bindung, $sql);
+
+                $sql = "SELECT LAST_INSERT_ID();";
+                $out = mdq($bindung, $sql);
+                while ($row = mysqli_fetch_row($out)) {
+                    $lastinsertid=$row[0];
+                }
+                
+                $file=str_replace('%4', "2", $file);
+                $file=str_replace('%5', "$lastinsertid", $file);
+                
+                $out=shell_exec("mkdir content/$username;");
+                $out=shell_exec("echo '$file' > content/$username/index.html");
+                
+                $sql = "INSERT INTO subscriptions SET user=0, type=1, type_id=$lastinsertid;";
                 $out = mdq($bindung, $sql);
             }
             else
@@ -314,7 +381,7 @@ if( $userid == '' or $ERROR_register != ''){
     }
 
         
-    echo "<a href='$URL'><img id='login_logo' src='DATA/logo_$version.png'></a>";
+    echo "<a href='$URL'><img id='login_logo' src='/DATA/logo_$version.png'></a>";
     if($in == 1){
         echo "
 <input type='hidden' name='deletecookies' id='deletecookies' value='0'>
@@ -365,6 +432,13 @@ But after an hour, all activity will be deleted.<p>
 <input type='submit' name='createano' class='btn' value='enter' $clickable_btn>
 </div>
 ";
+
+    ###       ADS ###
+
+    echo "<iframe src='ADS/adcontent.php' frameborder='0' scrolling='no' class='ads' allowTransparency='true'></iframe>";
+    
+    ### [END] ADS ###
+
 }else{
 
     # ==== BEGINNING FNCTNS ==== #
@@ -456,8 +530,8 @@ But after an hour, all activity will be deleted.<p>
             }
         }
         
-        if($reportuser == 1){
-            if($reportuser == 1){
+        if($reportuser == 1 or $reportype == 'user'){
+            if($reportype != "user"){
                 $reportid=$againstuserid;
             }
             
@@ -497,6 +571,18 @@ But after an hour, all activity will be deleted.<p>
 
     # ==== START ==== #
 
+    # SET OWN-USERID TO MY PROFILE
+    if(strpos($catsite,"user#")!==false){
+        $profileid=explode('#', $catsite);
+        $profileid=$profileid[1];
+        if($profileid == $userid){
+            $site=1;
+            $catsite=0;
+        }
+    }
+        
+        
+    
     $blogpx='0';
     $forumpx='0';
     $grouppx='0';
@@ -573,7 +659,7 @@ But after an hour, all activity will be deleted.<p>
     case 1:
         $chsites="
 <div class='catheader_child' id='ch0' onclick=\"catsite.value=0;document.mainpage.submit();\" $clickable_txt_cat0><span style='border-bottom:${catsitepx0}px solid #00ff00'>My Profile</span></div>
-<div class='catheader_child' id='ch1' onclick=\"catsite.value=1;document.mainpage.submit();\" $clickable_txt_cat1><span style='border-bottom:${catsitepx1}px solid #00ff00'>Friends</span></div>
+<div class='catheader_child' id='ch1' onclick=\"catsite.value=1;document.mainpage.submit();\" $clickable_txt_cat1><span style='border-bottom:${catsitepx1}px solid #00ff00'>Subscriptions</span></div>
 <div class='catheader_child' id='ch2' onclick=\"catsite.value=2;document.mainpage.submit();\" $clickable_txt_cat2><span style='border-bottom:${catsitepx2}px solid #00ff00'>Search</span></div>
 ";
         $userpx='2';
@@ -590,7 +676,7 @@ But after an hour, all activity will be deleted.<p>
     # START
     echo "
 <div id='header'>
-<img class='logo clickable' src='DATA/logo_$version.png' onclick=\"catsite.value=0;site.value=0;document.mainpage.submit();\" onmouseover=\"this.src='DATA/greenlogo_$version.png';\" onmouseout=\"this.src='DATA/logo_$version.png';\">
+<img class='logo clickable' src='/DATA/logo_$version.png' onclick=\"catsite.value=0;site.value=0;document.mainpage.submit();\" onmouseover=\"this.src='/DATA/greenlogo_$version.png';\" onmouseout=\"this.src='/DATA/logo_$version.png';\">
 <!-- SITE NO. 1 --><div class='header_child' ".$clickable_txt1." onclick=\"catsite.value=0;site.value=1;document.mainpage.submit();\"><span style='border-bottom:${userpx}px solid #00ff00'>Users</span></div>
 <!-- SITE NO. 2 --><div class='header_child' ".$clickable_txt2." onclick=\"catsite.value=0;site.value=2;document.mainpage.submit();\"><span style='border-bottom:${grouppx}px solid #00ff00'>Groups</span></div>
 <!-- SITE NO. 3 --><div class='header_child' ".$clickable_txt3." onclick=\"catsite.value=0;site.value=3;document.mainpage.submit();\"><span style='border-bottom:${forumpx}px solid #00ff00'>Forums</span></div>
@@ -690,7 +776,6 @@ But after an hour, all activity will be deleted.<p>
 
                 # CREATE LINK
                 
-                $file=str_replace('%3', "../", $file);
                 $file=str_replace('%4', "0", $file);
                 $file=str_replace('%5', "$bloginsertid", $file);
                                         
@@ -699,7 +784,7 @@ But after an hour, all activity will be deleted.<p>
                 
                 # END create link
                 
-                $sql = "INSERT INTO subscriptions SET blog=$bloginsertid, user=0;";
+                $sql = "INSERT INTO subscriptions SET type=0, type_id=$bloginsertid, user=0;";
                 $out = mdq($bindung, $sql);
                 $sql = "INSERT INTO blogposts SET title='', post='', blog=$bloginsertid;";
                 $out = mdq($bindung, $sql);
@@ -722,7 +807,17 @@ But after an hour, all activity will be deleted.<p>
         $createblogdisplay='block';
         $createblogerrordisplay='block';
     }
-    
+
+    if(isset($_POST['editpubkey']) and $_POST['pubkey'] != "Add GnuPG Public Key"){
+        $sql = "UPDATE user SET pubkey='".$_POST['pubkey']."' WHERE id=$userid;";
+        $out = mdq($bindung, $sql);
+    }
+
+    if(isset($_POST['editdescription']) and $_POST['description'] != "Add Description"){
+        $description=str_replace("'", "\'", $_POST['description']);
+        $sql = "UPDATE user SET description='".$description."' WHERE id=$userid;";
+        $out = mdq($bindung, $sql);
+    }
 
     if($_POST['votebackbtn'] == 1){
         echo "<div class='votings_opencontent votebackbtn' $clickable_showbtn onclick=\"site.value=0;catsite.value=1;document.mainpage.submit();\">Back to Votings</div>";
@@ -743,19 +838,20 @@ But after an hour, all activity will be deleted.<p>
             echo "<input type='hidden' name='replystat' id='replystat' value='".$_POST['replystat']."'>";
 
             $in=0;
-            $sql = "SELECT blogposts.id, title, post, date, COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END) AS zahl, blogposts.blog FROM blogposts, votes, blogs WHERE blogs.id=blogposts.blog AND votes.type=0 AND votes.type_id=blogposts.id AND post!='' AND title!='' GROUP BY blogposts.id ORDER by ROUND(blogposts.time/60/60/24/7) desc, zahl desc, blogposts.id desc LIMIT 1;";
+            $sql = "SELECT blogposts.id, title, post, date, COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END) AS zahl, blogposts.blog FROM blogposts, votes, blogs WHERE blogs.id=blogposts.blog AND votes.type=0 AND votes.type_id=blogposts.id AND post!='' AND title!='' GROUP BY blogposts.id ORDER by ROUND(blogposts.time/60/60/24/7) desc, zahl desc, blogposts.id desc LIMIT 5;";
             $out2 = mdq($bindung, $sql);
             while ($row2 = mysqli_fetch_row($out2)) {
 
                 # MISSING VARIABLES #
 
-                $sql="SELECT blogs.owner, blogs.id, user.username, blogs.name FROM blogs, user WHERE blogs.id=$row2[5] AND blogs.owner=user.id;";
+                $sql="SELECT blogs.owner, blogs.id, user.username, blogs.name, user.id FROM blogs, user WHERE blogs.id=$row2[5] AND blogs.owner=user.id;";
                 $out3 = mdq($bindung, $sql);
                 while ($row3 = mysqli_fetch_row($out3)) {
                     $blogownerid=$row3[0];
                     $blogid=$row3[1];
                     $blogownername=$row3[2];
                     $blogname=$row3[3];
+                    $profileid=$row3[4];
                 }
                 
                 # [END] MISSING VARIABLES #
@@ -772,7 +868,7 @@ But after an hour, all activity will be deleted.<p>
             }
 
             if($in == 0){
-                echo "<center class='bold'>WELCOME TO</center><img src='DATA/logo_$version.png' class='logo welcomemsg'>";
+                echo "<center class='bold'>WELCOME TO</center><img src='/DATA/logo_$version.png' class='logo welcomemsg'>";
             }
             
             echo "</div>";
@@ -782,16 +878,17 @@ But after an hour, all activity will be deleted.<p>
             echo "<div class='artikel'><div class='title'><span class='white'>></span> Votings</div>";
 
             $in=0;
-            $sql = "SELECT votings.type, votings.typeid, votings.description, votings.time, user.username, votings.id FROM votings, user WHERE votings.owner=user.id ORDER by time;";
+            $sql = "SELECT votings.type, votings.typeid, votings.description, votings.time, user.username, votings.id, votings.owner FROM votings, user WHERE votings.owner=user.id ORDER by time;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $votetype=$row[0];
                 $votetypeid=$row[1];
                 $votedescription=$row[2];
-                $votetime=(60*60*48)-(time()-$row[3]);
+                $votetime=(60*60*24)-(time()-$row[3]);
                 $voteowner=$row[4];
                 $votecountdown=sprintf('%02d:%02d:%02d', ($votetime/3600),($votetime/60%60), $votetime%60);
-
+                $profileid=$row[6];
+                
                 if($votedescription != ""){
                     $votedescription="<tr><td class='reporttable'><span class='grey'>Description:</span> </td><td class='reporttable'>$votedescription</td></tr>";
                 }
@@ -812,7 +909,7 @@ But after an hour, all activity will be deleted.<p>
                         $votetitle="Kick User <span class='white'>".$row2[0]."</span>?";
                     }
                     $voting_showtxt='User';
-                    $gotoreport="";
+                    $gotoreport="onclick=\"site.value=1;catsite.value='user#$votetypeid';votebackbtn.value=1;document.mainpage.submit();\"";
                 }
                 if($votetype == 2){
                     $sql = "SELECT user.username, blogs.id, blogposts.title FROM blogposts, blogs, user WHERE blogs.owner=user.id AND blogs.id=blogposts.blog AND blogposts.id=$votetypeid;";
@@ -877,7 +974,7 @@ But after an hour, all activity will be deleted.<p>
 
                 echo "<div class='post' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(8%,8%,8%)';mousebtns$postid.style.display='block';bubbleview$postid.style.display='block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='#000000';mousebtns$postid.style.display='none';bubbleview$postid.style.display='none';\">
 
-<div class='grey blogdate'>$votecountdown</div><div class='title posttitle'><span class='white'>#</span> $votetitle <span class='grey'>Voting by <span $clickable_grey class='clickable bold'>$voteowner</span></span></div>
+<div class='grey blogdate'>$votecountdown</div><div class='title posttitle'><span class='white'>#</span> $votetitle <span class='grey'>Voting by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$voteowner</span></span></div>
 <table class='reporttable_element'>
 $votedescription
 <tr><td class='reporttable'><span class='grey'>Votes:</span> </td><td class='reporttable'>".($provote+$contravote)."</td></tr>
@@ -911,22 +1008,128 @@ echo "
         # $$$ ABOUT $$$ #
         if($catsite == 2){
             echo "<div class='artikel'><div class='title'><span class='white'>></span> About</div>";
-            echo "<div class='linkbox'><img src='DATA/jcobs-engine_logo.png' class='link_icon'><div class='link_text'>MAINPAGE<img src='DATA/discord_verified.png' class='link_verified_symbol'></div><div class='link_invite_link' onclick=\"window.open('https://github.com/jcobs-engine/MAINPAGE');\" onmouseover=\"this.style.backgroundColor='#2ba06b';\" onmouseout=\"this.style.backgroundColor='#43b581';\">Open</div><img src='DATA/github_logo.png' class='link_logo'><div class='link_title'>GitHub:</div></div>";
-            echo "<div class='linkbox' style='margin-bottom:0px;'><img src='DATA/discord_icon.png' class='link_icon'><div class='link_text'>MAINPAGE<img src='DATA/discord_verified.png' class='link_verified_symbol'></div><div class='link_invite_link' onclick=\"window.open('https://discord.gg/tbwgRDh','targetWindow',`resizable=no,width=500,height=650`);return false;\" onmouseover=\"this.style.backgroundColor='#2ba06b';\" onmouseout=\"this.style.backgroundColor='#43b581';\">Join</div><img src='DATA/discord_logo.png' class='link_logo'><div class='link_title'>Discord:</div></div>";
+            echo "<div class='centerbox'><b>MainPage</b> is a free-speech and anonymous social network. You don't need to enter your email address to register. In addition, MainPage has no hierarchical structure. There are <i>no moderators or administrators</i>, everyone can start a voting on whether to kick a user or delete a blog post.<p>
+There is a trending page that shows the latest posts with the most upvotes. Everyone can create their own blogs, discuss in forums or chat with friends.<p>
+Please note that MainPage is currently still in a very <i>early development</i> phase and functions such as forums or groups have not yet been implemented. But that changes over time, because new updates come every week!<p>
+MainPage is and remains free and open source! But the server's electricity costs are around 20 USD (0.0025 BTC) per month. We rely on your support, every donation helps us.
+Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DATA/github_emojis/v.png' class='emoji'><p>
+<center><img class='donatewithpaypal' src='/DATA/donatewithpaypal.png' title='PayPal - The safer, easier way to pay online!' alt='Donate with PayPal' onclick=\"window.open('https://www.paypal.com/cgi-bin/webscr?cmd=_s-xclick&hosted_button_id=Q2QPRUCG47DCN&source=url');return false;\"><img src='/DATA/donatewithbitcoin.png' class='donatewithbitcoin' onclick=\"bitcoincode.style.backgroundColor='#ff0000';\"></center>
+<p>
+<center><span class='bitcoincodetitle'>BTC-Address:</span><span class='bitcoincode' id='bitcoincode'>39ozz HRBx xgjj CJfE HNTh XsrY aKB8 AbyLA</span></center>
+<p>
+</div>";
+            echo "<div class='linkbox'><img src='/DATA/jcobs-engine_logo.png' class='link_icon'><div class='link_text'>MAINPAGE<img src='/DATA/discord_verified.png' class='link_verified_symbol'></div><div class='link_invite_link' onclick=\"window.open('https://github.com/jcobs-engine/MAINPAGE');\" onmouseover=\"this.style.backgroundColor='#2ba06b';\" onmouseout=\"this.style.backgroundColor='#43b581';\">Open</div><img src='/DATA/github_logo.png' class='link_logo'><div class='link_title'>GitHub:</div></div>";
+            echo "<div class='linkbox' style='margin-bottom:0px;'><img src='/DATA/discord_icon.png' class='link_icon'><div class='link_text'>MAINPAGE<img src='/DATA/discord_verified.png' class='link_verified_symbol'></div><div class='link_invite_link' onclick=\"window.open('https://discord.gg/tbwgRDh','targetWindow',`resizable=no,width=500,height=650`);return false;\" onmouseover=\"this.style.backgroundColor='#2ba06b';\" onmouseout=\"this.style.backgroundColor='#43b581';\">Join</div><img src='/DATA/discord_logo.png' class='link_logo'><div class='link_title'>Discord:</div></div>";
             echo "</div>";
         }
     }
-    
+
     if($site == 1){
         # $$$ PROFILE $$$ #
         if($catsite == '0'){
-            echo "<div class='artikel' id='showprofile' style='display:$showdisplay'><div class='title'><span class='white'>></span> My Profile</div><div class='bold text'>$username</div>";
+            echo "<div class='artikel' id='showprofile' style='display:$showdisplay'><div class='title'><span class='white'>></span> My Profile<img src='/DATA/link.png' title='$URL_domain/content/$username' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$username';\"></div><div class='bold text'>$username</div>";
 
             if($password != 'NONE'){
-                echo "<div class='text'>".$password_orig."</div><span class='grey'>(The password shown is MD5 hashed.)</span><br><span class='right greytxt' $clickable_txt onclick=\"showprofile.style.display='none';editprofile.style.display='block';\">edit</span><br>";
+                echo "<div class='text'>".$password_orig."</div><span class='grey'>(The password shown is MD5 hashed.)</span><span class='right greytxt editbtn' $clickable_txt onclick=\"showprofile.style.display='none';editprofile.style.display='block';\">edit</span><br>";
+            }
+            echo "<div style='height:30px;'></div>";
+
+            $sql = "SELECT COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND user.id=$userid;";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $subs=$row[0];
             }
 
-echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div class='title'><span class='white'>></span> Edit Profile</div><div class='errorspan' style='display:$editerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_edit</div><input type='text' class='text' name='editusername' value='$username' placeholder='Username'><input type='password' placeholder='New password (optional)' name='editpassword' class='text'><input type='submit' name='editprofile' class='btn' value='edit' $clickable_btn></div>";
+            
+            $profileid=$userid;
+            include("CODEBLOCKS/profile.php");
+
+            echo "</div>";
+            echo "<div class='box' id='editprofile' style='display:$editdisplay;'><div class='title'><span class='white'>></span> Edit Profile</div><div class='errorspan' style='display:$editerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_edit</div><input type='text' class='text' name='editusername' value='$username' placeholder='Username'><input type='password' placeholder='New password (optional)' name='editpassword' class='text'><input type='submit' name='editprofile' class='btn' value='edit' $clickable_btn></div>";
+
+        }
+        # $$$ SEARCH USER $$$ #
+        if($catsite == '2'){
+            $search=$_POST['search'];
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Username' value='$search' autofocus><input type='submit' name='searchbtn' class='btn' $clickable_btn value='search' style='margin-bottom:40px;'>";
+
+            if($search == ''){
+                $searchstr='1=1';
+                $end=' LIMIT 100';
+            }
+            else{
+                $searchstr="LOWER(user.username) LIKE LOWER('%$search%')";
+                $end='';
+            }
+            $in=0;
+            $sql = "SELECT user.id, user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND ($searchstr) GROUP by user.id ORDER BY zahl desc, user.username$end;";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $searchid=$row[0];
+                $searchname=$row[1];
+                $searchsubs=$row[2];
+
+                if($searchid != ""){
+                    if($in == 0){
+                        $fieldlistaddon="style='border-top:2px solid #ffffff;'";
+                    }
+                    else{
+                        $fieldlistaddon="";
+                    }
+
+                    $openuser="catsite.value='user#$searchid';";
+                    
+                    echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"{$openuser}document.mainpage.submit();\">$searchname<span class='vote right bold' style='padding-top:0px;'>$searchsubs</span>";
+                    echo "</div>";
+                    $in=1;
+                }
+            }
+            
+            if($in == 0)
+                echo "<center>=== NO RESULTS ===</center>";
+
+            
+            echo "</div>";
+        }
+        # $$$ SUBSCRIPTIONS (USER) $$$ #
+        if($catsite == 1){
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Subscriptions</div>";
+
+            $in=0;
+            $sql = "SELECT user.id, user.username FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND subscriptions.user=$userid GROUP by user.id ORDER BY user.username;";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $searchid=$row[0];
+                $searchname=$row[1];
+
+                $sql2 = "SELECT COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND user.id=$searchid;";
+                $out2 = mdq($bindung, $sql2);
+                while ($row2 = mysqli_fetch_row($out2)) {
+                    $searchsubs=$row2[0];
+                }
+         
+                if($searchid != ""){
+                    if($in == 0){
+                        $fieldlistaddon="style='border-top:2px solid #ffffff;'";
+                    }
+                    else{
+                        $fieldlistaddon="";
+                    }
+
+                    $openuser="catsite.value='user#$searchid';";
+                    
+                    echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"{$openuser}document.mainpage.submit();\">$searchname<span class='vote right bold' style='padding-top:0px;'>$searchsubs</span>";
+                    echo "</div>";
+                    $in=1;
+                }
+            }
+            
+            if($in == 0)
+                echo "<center>=== NO USER ===</center>";
+
+            
+            echo "</div>";
+
         }
     }
 
@@ -936,13 +1139,14 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             echo "<div class='artikel'><div class='title'><span class='white'>></span> Subscriptions</div><div class='rightbtn' $clickable_btn onclick=\"catsite.value=2;document.mainpage.submit();\">search</div>";
 
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, user.username, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)), 0) AS zahl, IF((MAX(blogposts.time)-MAX(timestamps.time))>0,1,0) AS reddit FROM blogs, user, blogposts, votes, subscriptions, timestamps WHERE blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.blog=blogs.id AND subscriptions.user=$userid AND timestamps.type=0 AND timestamps.type_id=blogs.id AND timestamps.user=$userid GROUP by blogs.id ORDER BY reddit desc, blogposts.id desc;";
+            $sql = "SELECT blogs.id, blogs.name, user.username, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)), 0) AS zahl, IF((MAX(blogposts.time)-MAX(timestamps.time))>0,1,0) AS reddit, user.id FROM blogs, user, blogposts, votes, subscriptions, timestamps WHERE blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND subscriptions.user=$userid AND timestamps.type=0 AND timestamps.type_id=blogs.id AND timestamps.user=$userid GROUP by blogs.id ORDER BY reddit desc, blogposts.id desc;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
                 $searchname=$row[1];
                 $searchuser=$row[2];
                 $vote=$row[3];
+                $profileid=$row[5];
                 if($vote == ''){
                     $vote=0;
                 }
@@ -955,7 +1159,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                     $styleaddon.="border-top:2px solid #ffffff;";
                 }
 
-                echo "<div class='listfield' $clickable_field style='$styleaddon' onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$searchname <span class='grey'>by <span $clickable_grey class='clickable'>$searchuser</span></span><span class='vote right bold' style='padding-top:0px;'>$vote</span></div>";
+                echo "<div class='listfield' $clickable_field style='$styleaddon' onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$searchname <span class='grey'>by <span $clickable_grey class='clickable' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$searchuser</span></span><span class='vote right bold' style='padding-top:0px;'>$vote</span></div>";
                 $in=1;
             }
 
@@ -969,7 +1173,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             echo "<div class='box' id='createblog' style='display:$createblogdisplay'><div class='title'><span class='white'>></span> Create Blog</div><div class='errorspan' style='display:$createblogerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_createblog</div><input type='text' maxlength='32' class='text' name='createblog_name' placeholder='Name'><input type='submit' name='createblog' class='btn' $clickable_btn value='create'></div><div class='artikel' id='myblogs' style='display:$blogsdisplay'><div class='title'><span class='white'>></span> My Blogs</div><div class='rightbtn' $clickable_btn onclick=\"createblog.style.display='block';myblogs.style.display='none';\">Create new</div>";
 
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)-COUNT(CASE WHEN blogposts.title='' THEN 1 END)), 0) AS zahl FROM blogs, user, blogposts, votes WHERE blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc;";
+            $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(blogposts.id)-COUNT(CASE WHEN blogposts.title='' THEN 1 END)), 0) AS zahl, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl2 FROM blogs, user, blogposts, votes, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl2 desc, blogposts.id desc;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
@@ -991,7 +1195,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
         # $$$ SEARCH BLOGS $$$ #
         if($catsite == '2'){
             $search=$_POST['search'];
-            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Blog, Post or User' value='$search' autofocus><input type='submit' name='createblog' class='btn' $clickable_btn value='search' style='margin-bottom:40px;'>";
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Blog, Post or User' value='$search' autofocus><input type='submit' name='searchbtn' class='btn' $clickable_btn value='search' style='margin-bottom:40px;'>";
 
             $end='';
             $searchstr='1=0';
@@ -1006,16 +1210,17 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
 
             if($searchstr == '1=0'){
                 $searchstr='1=1';
-                $end=' LIMIT 10';
+                $end=' LIMIT 100';
             }
 
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl FROM blogs, user, blogposts, votes, subscriptions WHERE blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.blog=blogs.id AND ($searchstr) GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc$end;";
+            $sql = "SELECT blogs.id, blogs.name, user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl, user.id FROM blogs, user, blogposts, votes, subscriptions WHERE blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND ($searchstr) GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc$end;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
                 $searchname=$row[1];
                 $searchuser=$row[2];
+                $profileid=$row[4];
                 
                 $sql = "SELECT ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT( DISTINCT blogposts.id)), 0) AS zahl FROM blogs, blogposts, votes WHERE blogs.id=$blogid AND blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogposts.title!='' GROUP by blogs.id;";
                 $out3 = mdq($bindung, $sql);
@@ -1033,7 +1238,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                     $fieldlistaddon="";
                 }
 
-                echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$searchname <span class='grey'>by <span $clickable_grey class='clickable'>$searchuser</span></span><span class='vote right bold' style='padding-top:0px;'>$vote</span>";
+                echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$searchname <span class='grey'>by <span $clickable_grey class='clickable' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$searchuser</span></span><span class='vote right bold' style='padding-top:0px;'>$vote</span>";
 
                 // THEMES
                 $themes='';
@@ -1060,7 +1265,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
     }
     
     # $$$ BLOG-VIEW $$$ #
-    if(strpos($catsite,"blog")!==false){
+    if(strpos($catsite,"blog#")!==false){
         $blogid=explode('#', $catsite);
         $blogid=$blogid[1];
 
@@ -1086,11 +1291,11 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
         }
 
         if($_POST['subscribe'] == $blogid){
-            $sql = "INSERT INTO subscriptions SET blog=$blogid, user=$userid;";
+            $sql = "INSERT INTO subscriptions SET type=0, type_id=$blogid, user=$userid;";
             $out = mdq($bindung, $sql);
         }
         if($_POST['unsubscribe'] == $blogid){
-            $sql = "DELETE FROM subscriptions WHERE blog=$blogid AND user=$userid;";
+            $sql = "DELETE FROM subscriptions WHERE type=0 AND type_id=$blogid AND user=$userid;";
             $out = mdq($bindung, $sql);
         }
         
@@ -1111,7 +1316,6 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             $sql = "INSERT INTO votes SET vote=2, type=0, type_id=LAST_INSERT_ID(), user=$userid, type_catid=$blogid;";
             $out = mdq($bindung, $sql);
 
-            $file=str_replace('%3', "../", $file);
             $file=str_replace('%4', "1", $file);
             $file=str_replace('%5', "$blogpostid", $file);
             
@@ -1173,13 +1377,13 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
 </div>";
                 }
                 
-                echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid'><div class='title'><span class='white'>></span> $blogname<img src='DATA/link.png' title='$URL_domain/content/$blogowner/$blogname' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname';\"> <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogowner</span></span></div>";
+                echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid'><div class='title'><span class='white'>></span> $blogname<img src='/DATA/link.png' title='$URL_domain/content/$blogowner/$blogname' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname';\"> <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$blogownerid';document.mainpage.submit();\">$blogowner</span></span></div>";
                 if($blogownerid == $userid){
                     echo "<div class='rightbtn' $clickable_btn onclick=\"newpost$blogid.style.display='block';blog$blogid.style.display='none';\">New post</div>";
                 }
                 else{
                     $sub=0;
-                    $sql = "SELECT id FROM subscriptions WHERE blog=$blogid AND user=$userid;";
+                    $sql = "SELECT id FROM subscriptions WHERE type=0 AND type_id=$blogid AND user=$userid;";
                     $out = mdq($bindung, $sql);
                     while ($row = mysqli_fetch_row($out)) {
                         $sub=1;
@@ -1187,7 +1391,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
                     if($sub == 0)
                         echo "<div class='rightbtn' $clickable_btn onclick=\"subscribe.value=$blogid;document.mainpage.submit();\">subscribe</div>";
                     else
-                        echo "<div class='rightbtn' $clickable_btn onclick=\"unsubscribe.value=$blogid;document.mainpage.submit();\">Unsubscribe</div>";
+                        echo "<div class='rightbtn' $clickable_btn onclick=\"unsubscribe.value=$blogid;document.mainpage.submit();\">unsubscribe</div>";
                 }
 
                 $gtb=explode('_', $_POST['gt_blogpost']);
@@ -1235,12 +1439,60 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
         $_POST['gt_blogpost']='';
     }
 
+    # $$$ USER-VIEW $$$ #
+    if(strpos($catsite,"user#")!==false){
+        $profileid=explode('#', $catsite);
+        $profileid=$profileid[1];
+
+
+        if($_POST['subscribe_user'] == $profileid){
+            $sql = "INSERT INTO subscriptions SET type=1, type_id=$profileid, user=$userid;";
+            $out = mdq($bindung, $sql);
+        }
+        if($_POST['unsubscribe_user'] == $profileid){
+            $sql = "DELETE FROM subscriptions WHERE type=1 AND type_id=$profileid AND user=$userid;";
+            $out = mdq($bindung, $sql);
+        }
+
+        
+        $sql = "SELECT user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND user.id=$profileid;";
+        $out = mdq($bindung, $sql);
+        while ($row = mysqli_fetch_row($out)) {
+            $profilename=$row[0];
+            $subs=$row[1];
+        }
+
+        echo "<input type='hidden' name='subscribe_user' id='subscribe' value='0'><input type='hidden' name='unsubscribe_user' id='unsubscribe' value='0'><div class='artikel'><div class='title'><span class='white'>></span> $profilename<img src='/DATA/link.png' title='$URL_domain/content/$profilename' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$profilename';\"></div>";
+
+        if($blogownerid != $userid){
+            $sub=0;
+            $sql = "SELECT id FROM subscriptions WHERE type=1 AND type_id=$profileid AND user=$userid;";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $sub=1;
+            }
+            if($sub == 0)
+                echo "<div class='rightbtn' $clickable_btn onclick=\"subscribe.value=$profileid;document.mainpage.submit();\">subscribe</div>";
+            else
+                echo "<div class='rightbtn' $clickable_btn onclick=\"unsubscribe.value=$profileid;document.mainpage.submit();\">unsubscribe</div>";
+        }
+        
+
+        include("CODEBLOCKS/profile.php");
+
+        echo "<br><span class='right greytxt' onclick=\"catsite.value='report#user:$profileid';document.mainpage.submit();\" ".str_replace('#00ff00', '#ff0000', $clickable_txt).">report user</span><br>";
+        
+        echo "</div>";
+    }
+
+
     if($password == 'NONE'){
 #        echo "<div style='position:fixed;width:calc(".($sec/(60*60)*100)."% - 0px);left:0px;bottom:0px;background-color:#00ff00;color:black;text-align:center;'>$timeout</div>";
         echo "<div style='position:fixed;width:90px;right:0px;bottom:0px;background-color:#00ff00;color:black;text-align:center;'>$timeout</div>";
     }
 
-    if(strpos($catsite,"report")!==false){
+    # $$$ REPORT-VIEW $$$ #
+    if(strpos($catsite,"report#")!==false){
         $reportid=explode('#', $catsite);
         $reportid=explode(':', $reportid[1]);
         $reportype=$reportid[0];
@@ -1248,11 +1500,12 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
 
         if($reportype == 'blog'){
             $in=0;
-            $sql = "SELECT blogs.name, user.username FROM blogs, user WHERE user.id=blogs.owner AND blogs.id=$reportid;";
+            $sql = "SELECT blogs.name, user.username, user.id FROM blogs, user WHERE user.id=blogs.owner AND blogs.id=$reportid;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $reportblogname=$row[0];
                 $reportblogowner=$row[1];
+                $profileid=$row[2];
                 $in=1;
             }
 
@@ -1263,7 +1516,7 @@ echo "</div><div class='box' id='editprofile' style='display:$editdisplay;'><div
             }
             if($in == 1){
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold'>$reportblogname</span> by <span $clickable_grey class='clickable bold'>$reportblogowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">$reportblogname</span> by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogowner</span></span></div>
 <textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
                     
                     echo "<input type='hidden' name='reportuser' id='reportuser' value='0'>
@@ -1274,7 +1527,7 @@ echo "<input type='submit' name='report' class='btn' value='report' $clickable_b
 </div>";
             }else{
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold'>$reportblogname</span> by <span $clickable_grey class='clickable bold'>$reportblogowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">$reportblogname</span> by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogowner</span></span></div>
 
 Blog already reported. See Votings.<p>
 
@@ -1283,13 +1536,13 @@ Blog already reported. See Votings.<p>
             }
         }
 
-
         if($reportype == 'blogpost'){
             $in=0;
-            $sql = "SELECT user.username FROM blogposts, blogs, user WHERE user.id=blogs.owner AND blogs.id=blogposts.blog AND blogposts.id=$reportid;";
+            $sql = "SELECT user.username, user.id FROM blogposts, blogs, user WHERE user.id=blogs.owner AND blogs.id=blogposts.blog AND blogposts.id=$reportid;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $reportblogpostowner=$row[0];
+                $profileid=$row[1];                
                 $in=1;
             }
                 
@@ -1300,7 +1553,7 @@ Blog already reported. See Votings.<p>
             }
             if($in == 1){
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold'>$reportblogpostowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogpostowner</span></span></div>
 <textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
                     
                     echo "<input type='hidden' name='reportuser' id='reportuser' value='0'>
@@ -1311,9 +1564,43 @@ echo "<input type='submit' name='report' class='btn' value='report' $clickable_b
 </div>";
             }else{
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold'>$reportblogname</span> by <span $clickable_grey class='clickable bold'>$reportblogowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogpostowner</span></span></div>
 
 Post already reported. See Votings.<p>
+
+<input type='submit' name='report_fail' class='btn' value='Open Votings' $clickable_btn>
+</div>";        
+            }
+
+        }
+        
+        
+        if($reportype == 'user'){
+            $in=0;
+            $sql = "SELECT user.username, user.id FROM user WHERE user.id=$reportid;";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $profileid=$row[1];
+                $reportusername=$row[0];
+                $in=1;
+            }
+            
+            $sql = "SELECT id FROM votings WHERE votings.type=1 AND votings.typeid=$reportid;";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $in=0;
+            }
+            if($in == 1){
+                echo "
+<div class='box'><div class='title'><span class='white'>></span> Report User <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportusername</span></span></div>
+<textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
+                    
+                    echo "<input type='submit' name='report' class='btn' value='report' $clickable_btn></div>";
+            }else{
+                echo "
+<div class='box'><div class='title'><span class='white'>></span> Report User <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportusername</span></span></div>
+
+User already reported. See Votings.<p>
 
 <input type='submit' name='report_fail' class='btn' value='Open Votings' $clickable_btn>
 </div>";        

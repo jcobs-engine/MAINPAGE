@@ -61,6 +61,11 @@ $clickable_linkicon="onmouseover=\"this.style.opacity='1';\" onmouseout=\"this.s
 $clickable_votingbtn_green_cap=$clickable_votingbtn_green;
 $clickable_votingbtn_red_cap=$clickable_votingbtn_red;
 
+$clickable_kd="onmouseover=\"this.style.backgroundColor='rgb(8%,8%,8%)';this.style.color='#00ff00';\" onmouseout=\"this.style.backgroundColor='transparent';if(kdc%id.style.display == 'none'){this.style.color='#ffffff';}\"";
+
+$bubble_kd="onclick=\"if(kdc%id.style.display == 'none'){unactive_all.click();kda%id.style.transform='rotate(0deg)';kdc%id.style.display='block';kd%id.style.color='#00ff00';kd%id.style.fontWeight='bold';kd%id.style.borderBottom='2px solid #00ff00';kd%ido.style.borderBottom='2px solid #00ff00';}else{unactive_all.click();}\"";
+$bubble_kd_unactive="kd%id.style.fontWeight='normal';kdc%id.style.display='none';kd%id.style.color='#ffffff';kd%id.style.borderBottom='2px solid #ffffff';kd%ido.style.borderBottom='2px solid #ffffff';kda%id.style.transform='rotate(180deg)';";
+
 $host = "localhost";
 $benutzer = 'MAINPAGE';
 $passwort = 'MAINPAGE';

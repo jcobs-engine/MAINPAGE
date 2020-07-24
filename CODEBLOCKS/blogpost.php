@@ -5,8 +5,46 @@ if($firstpost == $oldpost and $firstpost != ""){
 }
 
 # POST EDIT
+
+$post=$row2[2];
+
+#       VERIFY #
+
+$sql = "SELECT user.pubkey FROM blogs, user WHERE blogs.id=$blogid AND user.id=blogs.owner;";
+$out3= mdq($bindung, $sql);
+while ($row3 = mysqli_fetch_row($out3)) {
+    $pubkey_user=trim($row3[0]);
+}
+
+$beginn_of_str="-----BEGIN PGP SIGNED MESSAGE-----";
+$end_of_str="-----END PGP SIGNATURE-----";
+
+if(strpos($post, $beginn_of_str) === 0 and preg_match("#$end_of_str$#",$post) and $pubkey_user != ""){
+    $rohpost=$post;
+    $post=substr($post, 52);
+    $post=explode("-----BEGIN PGP SIGNATURE-----", $post);
+    $post=$post[0];
+    $post=substr($post, 0, -2);
+    file_put_contents('DATA/tmp1.asc', $pubkey_user);
+    $out3=shell_exec("gpg --yes --batch --dearmor ./DATA/tmp1.asc");
+    file_put_contents('DATA/tmp2.txt', $rohpost);
+    $out3=shell_exec("dos2unix DATA/tmp2.txt");
+    $out4=shell_exec("gpg --no-default-keyring --keyring ./DATA/tmp1.asc.gpg --verify DATA/tmp2.txt 2>&1");
+    $out3=shell_exec("rm DATA/tmp*;");
+    $out_lines=explode("\n", $out3);
+    $sig_date=substr($out_lines[0], 20);
+    $sig_uid=substr($out_lines[2], 28, -1);
+    $sig_fingerprint=substr($out_lines[6], 24);
+    if(strpos($out4,"gpg: Good signature")!==false){
+        $htmlpostprefix="<div class='verifybox'><table><tr><th colspan='2' style='color:#00ff00;cursor:pointer' onclick=\"if(ex1_$postid.style.display == 'none'){ex1_$postid.style.display='table-row';ex2_$postid.style.display='table-row';ex3_$postid.style.display='table-row';}else{ex1_$postid.style.display='none';ex2_$postid.style.display='none';ex3_$postid.style.display='none';}\">Valid Signature</th></tr><tr id='ex1_$postid' style='display:none'><td class='grey'>UID: </td><td>$sig_uid</td></tr><tr id='ex2_$postid' style='display:none'><td class='grey'>Fingerprint: </td><td>$sig_fingerprint</td></tr><tr id='ex3_$postid' style='display:none'><td class='grey'>Date: </td><td>$sig_date</td></tr></table></div>";
+    }else{
+        $htmlpostprefix="<div class='verifybox'><table><tr><th colspan='2' style='color:#ff0000;'>Invalid Signature</th></tr></table></div>";
+    }
+}
+
+# [END] VERIFY #
                     
-$post=umlaute($row2[2]);
+$post=umlaute($post);
 $post=Parsedown::instance()
      ->setBreaksEnabled(true)
      ->text($post);
@@ -86,17 +124,17 @@ if($postid != ''){
     else
         $style='';
 
-    if($SETTING['trenddesign'] == 1){
-        $styleaddon_marginbtm='margin-bottom:10px;';
-    }else{
-        $styleaddon_marginbtm='';
-    }
+#    if($SETTING['trenddesign'] == 1){
+#        $styleaddon_marginbtm='margin-bottom:10px;';
+#    }else{
+#        $styleaddon_marginbtm='';
+#    }
                         
     echo "<input type='hidden' name='votefor$postid' id='votefor$postid' value='0'><div class='post' style='$styleaddon_marginbtm' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(8%,8%,8%)';mousebtns$postid.style.display='block';bubbleview$postid.style.display='block';bubbleview2_$postid.style.display='block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='#000000';mousebtns$postid.style.display='none';bubbleview$postid.style.display='none';bubbleview2_$postid.style.display='none';\">
 
 <div style='float:left; cursor:pointer;' onmouseout=\"{$block}pnts$postid.style.display='block';{$block}voteup_$postid.style.display='none';{$block}votedown_$postid.style.display='none';\">
-<img src='DATA/vote_white.png' class='pnts_up' style='display:none' id='voteup_$postid' onclick=\"votefor$postid.value=1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_green.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
-<img src='DATA/vote_white.png' class='pnts_down' style='display:none' id='votedown_$postid' onclick=\"votefor$postid.value=-1;document.mainpage.submit();\" onmouseover=\"this.src='DATA/vote_red.png'\" onmouseout=\"this.src='DATA/vote_white.png'\">
+<img src='/DATA/vote_white.png' class='pnts_up' style='display:none' id='voteup_$postid' onclick=\"votefor$postid.value=1;document.mainpage.submit();\" onmouseover=\"this.src='/DATA/vote_green.png'\" onmouseout=\"this.src='/DATA/vote_white.png'\">
+<img src='/DATA/vote_white.png' class='pnts_down' style='display:none' id='votedown_$postid' onclick=\"votefor$postid.value=-1;document.mainpage.submit();\" onmouseover=\"this.src='/DATA/vote_red.png'\" onmouseout=\"this.src='/DATA/vote_white.png'\">
 </div>
 
 <div class='pnts' style='$style$block' onmouseover=\"{$block}this.style.display='none';{$block}voteup_$postid.style.display='block';{$block}votedown_$postid.style.display='block';\" id='pnts$postid'>$votes</div>";
@@ -126,9 +164,9 @@ if($postid != ''){
         }
 
         if($SETTING['trenddesign'] == 0){
-            echo "<div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title<img src='DATA/link.png' title='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."' class='linkicon_post' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."';\"></div>";
+            echo "<div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title<img src='/DATA/link.png' title='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."' class='linkicon_post' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."';\"></div>";
         }else{
-            echo "<div class='absolutetopright secondtitle' $clickable_secondtitle onclick=\"site.value=4;catsite.value='blog#$blogid';gt_blogpost.value='{$blogid}_{$postid}';document.mainpage.submit();\">$blogname</div><div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title<img src='DATA/link.png' title='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."' class='linkicon_post' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."';\"> <span class='grey'>by <span $clickable_grey class='clickable bold'>$blogownername</span></span></div>";
+            echo "<div class='absolutetopright secondtitle' $clickable_secondtitle onclick=\"site.value=4;catsite.value='blog#$blogid';gt_blogpost.value='{$blogid}_{$postid}';document.mainpage.submit();\">$blogname</div><div class='grey blogdate'>$date</div><div class='title posttitle'><span class='white'>#</span> $title<img src='/DATA/link.png' title='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."' class='linkicon_post' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname/".setfilename($title)."';\"> <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$blogownername</span></span></div>";
         }
         
         echo "<div class='postcontent'>
@@ -137,6 +175,7 @@ $origpost
 </div>
 
 <div style='display:block;' id='htmlpost$postid'>
+$htmlpostprefix
 $post
 </div>
 </div>
@@ -144,7 +183,7 @@ $post
 <span class='greytxt grey right' $clickable_grey style='display:none;' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-view'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='source-view'; }\">source-view</span>
 
 <hr class='commentline'>
-<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
+<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='/DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
 <div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
         if($blogownerid != $userid and $SETTING['contentdesign'] != 1){
             echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write comment</textarea>
@@ -270,7 +309,7 @@ $post
                         }
                     }
 
-                    echo "<div class='commentbox'>".$commenttext."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-3px;width:16px;'></div>";
+                    echo "<div class='commentbox'>".$commenttext."</div><div class='heartfield' style='$heartcursor' $clickable_heart onclick=\"{$full}heartcomment.value='".$row3[3]."';document.mainpage.submit();\">".$row3[4]." <img src='/DATA/heart{$full}.png' id='heart".$row3[3]."' style='margin-bottom:-3px;width:16px;'></div>";
 
                     ### <------- REPLYS -------> ##
                                         
@@ -278,7 +317,7 @@ $post
 
 onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';}else{replystat.value='0';replycontent$commentid.style.display='none';reply_einklappen$commentid.style.transform='rotate(180deg)';}\"
 
-><img src='DATA/einklappen.png' class='einklappen' id='reply_einklappen$commentid' style='$replyarrow_stylechanges'>$replyscount repl$replyplural</div><div class='comments' id='replycontent$commentid' style='display:".$replyboxdisplay[$commentid]."'>";
+><img src='/DATA/einklappen.png' class='einklappen' id='reply_einklappen$commentid' style='$replyarrow_stylechanges'>$replyscount repl$replyplural</div><div class='comments' id='replycontent$commentid' style='display:".$replyboxdisplay[$commentid]."'>";
 
                     if( $SETTING['contentdesign'] != 1 ){
                         echo "<textarea id='replyarea$commentid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='replytext$commentid'>Write reply</textarea>

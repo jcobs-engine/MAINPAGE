@@ -113,7 +113,7 @@ th{
 
 .text{
     position:relative;
-    width:100%;
+    width:calc(100% - 6px);
     background-color:transparent;
     color:#ffffff;
     border:0px;
@@ -131,7 +131,7 @@ th{
 
 .textarea{
     position:relative;
-    width:calc(100% - 40px);
+    width:calc(100% - 44px);
     background-color:transparent;
     color:#ffffff;
     border:2px solid #ffffff;
@@ -180,7 +180,7 @@ th{
 .box{
     position:relative;
     width:500px;
-    left:calc(50% - 250px);
+    left:calc(50% - 270px);
     padding:20px;
     padding-top:10px;
     border:2px solid white;
@@ -365,6 +365,10 @@ th{
     font-size:16px;
 }
 
+.verylittle{
+    font-size:12px;
+}
+
 .searchtitle{
     padding-left:20px;
 }
@@ -381,7 +385,7 @@ th{
 }
 
 .commentline{
-    border:1px solid #ffffff;
+    border:1px solid rgba(100%, 100%, 100%, 0.5);
     margin-top:30px;
 }
 
@@ -534,12 +538,20 @@ th{
     background-color:#ff0000;
 }
 
+.back_orange{
+    background-color:#ffa500;
+}
+
 .back_green{
     background-color:#00ff00;
 }
 
 .back_white{
     background-color:#ffffff;
+}
+
+.black{
+    color:#000000;
 }
 
 .votebalk{
@@ -606,7 +618,7 @@ th{
 
 .votebackbtn{
     position:absolute;
-    left:calc(10% + 7px);
+    left:calc(10% + 6px);
     top:200px;
 }
 
@@ -647,6 +659,113 @@ th{
     line-height:50px;
     font-size:25px;
     color:#00ff00;
+}
+
+.editbtn{
+    margin-top:-3px;
+}
+
+.klappdivcontentbox{
+    position:relative;
+    width:calc(100% - 24);
+    border-bottom:2px solid #ffffff;
+    padding:20px;
+}
+
+.klappdivcontent{
+    padding-top:15px;
+    padding-bottom:15px;
+    padding-right:10px;
+    padding-left:15px;
+    border-left:2px solid #ffffff;
+}
+
+.klappdivdescription{
+    padding-top:1px;
+    padding-bottom:1px;
+}
+
+.listfieldgreytxt{
+    margin-top:-5px;
+}
+
+.verifybox{
+    width:650px;
+    margin-bottom:20px;
+}
+
+.pubkeyarea{
+    font-size:12px;
+}
+
+.centerbox{
+    background-color:#2f3136;
+    padding:20px;
+    padding-bottom:1px;
+    width:70%;
+    margin-left:auto;
+    margin-right:auto;
+    margin-bottom:60px;
+    border-radius:5px;
+}
+
+.donatewithpaypal{
+    height:35px;
+    cursor:pointer;
+    margin-right:20px;
+}
+
+.donatewithbitcoin{
+    height:22px;
+    cursor:pointer;
+    margin-bottom:6px;
+}
+
+.bitcoincode{
+    background-color:rgb(10%, 10%, 10%);
+    padding:5px;
+    font-size:13px;
+    border-radius:0px 3px 3px 0px;
+    font-weight:bold;
+    color:#ffffff;
+}
+
+.bitcoincodetitle{
+    background-color:rgb(80%, 80%, 80%);
+    padding:5px;
+    font-size:13px;
+    border-radius:3px 0px 0px 3px;
+    font-weight:bold;
+    color:#000000;
+}
+
+.ads{
+    overflow:hidden;
+    position:absolute;
+    bottom:20px;
+    left:calc(50% - 234px);
+    width:468px;
+    height:100px;
+}
+
+.adimage{
+    cursor:pointer;
+    position:absolute;
+    bottom:0px;
+    left:0px;
+    width:468px;
+    height:60px;
+}
+
+.adimagepreview{
+    display:block;
+    position:relative;
+    left:auto;
+    bottom:auto;
+}
+
+.italic{
+    font-style:italic;
 }
 
 /* PARSEDOWN */
