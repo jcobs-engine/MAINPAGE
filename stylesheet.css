@@ -1,3 +1,4 @@
+
 body{
     background-color:#000000;
     color:#ffffff;
@@ -743,7 +744,7 @@ th{
     overflow:hidden;
     position:absolute;
     bottom:20px;
-    left:calc(50% - 234px);
+    right:20px;
     width:468px;
     height:100px;
 }

@@ -94,6 +94,7 @@ if($description != "" or $userid == $profileid){
     if($userid == $profileid){
         if(trim($descriptionroh) != "Add Description" and trim($descriptionroh) != ""){
             $edittxt_bio="edit";
+            $klappdivdescription="klappdivdescription";
         }
         else{
             $edittxt_bio="Add";
@@ -101,7 +102,8 @@ if($description != "" or $userid == $profileid){
         
         echo "<span class='right greytxt grey listfieldgreytxt' $clickable_grey onclick=\"event.stopPropagation();unactive_all.click();kd$kdid.click();kdroh$kdid.style.display='none';kdedit$kdid.style.display='block';\">$edittxt_bio</span>";
     }
-    echo "</div><div class='klappdivcontentbox' id='kdc$kdid' style='display:none'><div class='klappdivcontent klappdivdescription' $clickable_post>";
+    
+    echo "</div><div class='klappdivcontentbox' id='kdc$kdid' style='display:none'><div class='klappdivcontent $klappdivdescription' $clickable_post>";
     echo "<div id='kdroh$kdid'>$description</div>";
     echo "<div id='kdedit$kdid' style='display:none'><textarea class='textarea' name='description' $textareaaddon_bio>$descriptionroh</textarea><input type='submit' name='editdescription' value='edit' class='btn' $clickable_btn></div>";
     echo "</div></div>";
