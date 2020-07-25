@@ -20,7 +20,7 @@ $beginn_of_str="-----BEGIN PGP SIGNED MESSAGE-----";
 $end_of_str="-----END PGP SIGNATURE-----";
 $htmlpostprefix="";
 
-if(strpos($post, $beginn_of_str) === 0 and $pubkey_user != ""){
+if(strpos($post, $beginn_of_str) === 0 and preg_match("#$end_of_str$#",$post) and $pubkey_user != ""){
     $rohpost=$post;
     $post=substr($post, 52);
     $post=explode("-----BEGIN PGP SIGNATURE-----", $post);
