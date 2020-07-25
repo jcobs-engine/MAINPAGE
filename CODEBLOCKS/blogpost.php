@@ -6,7 +6,7 @@ if($firstpost == $oldpost and $firstpost != ""){
 
 # POST EDIT
 
-$post=$row2[2];
+$post=trim($row2[2]);
 
 #       VERIFY #
 
@@ -18,8 +18,9 @@ while ($row3 = mysqli_fetch_row($out3)) {
 
 $beginn_of_str="-----BEGIN PGP SIGNED MESSAGE-----";
 $end_of_str="-----END PGP SIGNATURE-----";
+$htmlpostprefix="";
 
-if(strpos($post, $beginn_of_str) === 0 and preg_match("#$end_of_str$#",$post) and $pubkey_user != ""){
+if(strpos($post, $beginn_of_str) === 0 and $pubkey_user != ""){
     $rohpost=$post;
     $post=substr($post, 52);
     $post=explode("-----BEGIN PGP SIGNATURE-----", $post);
@@ -31,7 +32,7 @@ if(strpos($post, $beginn_of_str) === 0 and preg_match("#$end_of_str$#",$post) an
     $out3=shell_exec("dos2unix DATA/tmp2.txt");
     $out4=shell_exec("gpg --no-default-keyring --keyring ./DATA/tmp1.asc.gpg --verify DATA/tmp2.txt 2>&1");
     $out3=shell_exec("rm DATA/tmp*;");
-    $out_lines=explode("\n", $out3);
+    $out_lines=explode("\n", $out4);
     $sig_date=substr($out_lines[0], 20);
     $sig_uid=substr($out_lines[2], 28, -1);
     $sig_fingerprint=substr($out_lines[6], 24);
