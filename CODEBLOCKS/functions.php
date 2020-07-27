@@ -46,6 +46,22 @@ function dlt_html($post){
     return $post.'<p>';
 }
 
+function getpgpmetadata($pubkey){
+    file_put_contents('DATA/tmp.txt', trim($pubkey));
+    $var=shell_exec("( cat DATA/tmp.txt | gpg --with-colons --import-options show-only --import ) > DATA/tmp2.txt");
+    $return[1]=shell_exec("cat DATA/tmp2.txt | head -n 2 | tail -n 1 | grep -oP '(?<=:).*?(?=:)' 2>&1");
+    $arr = str_split(strtoupper($return[1]),4);
+    $return[1]="";
+    foreach ($arr as $a) {
+        $return[1] .= $a .' ';
+    }
+    $return[0]=str_replace('<p>', '', dlt_html(shell_exec('var=$( cat DATA/tmp2.txt | head -n 3 | tail -n 1 ); var=${var:63}; echo ${var/:*/};')));
+    $var=shell_exec("rm -f DATA/tmp.txt DATA/tmp2.txt;");
+    
+    return $return;
+}
+
+
 $clickable_txt="onmouseover=\"this.style.color='#00ff00';\" onmouseout=\"this.style.color='#ffffff';\"";
 $clickable_greentxt="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='#00ff00';\"";
 $clickable_btn="onmouseover=\"this.style.backgroundColor='#00ff00';\" onmouseout=\"this.style.backgroundColor='#ffffff';\"";
