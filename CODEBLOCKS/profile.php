@@ -129,19 +129,9 @@ if($pubkey != "" or $userid == $profileid){
         $pubkey="<center><span class='grey greytxt' $clickable_grey onclick=\"kdedit$kdid.style.display='block';kdroh$kdid.style.display='none';\">Add GnuPG Public Key</span></center>";
     }
     else{
-        file_put_contents('DATA/tmp.txt', trim($pubkey));
-        $var=shell_exec("( cat DATA/tmp.txt | gpg --with-colons --import-options show-only --import ) > DATA/tmp2.txt");
-        $fingerprint=shell_exec("cat DATA/tmp2.txt | head -n 2 | tail -n 1 | grep -oP '(?<=:).*?(?=:)' 2>&1");
-        $arr = str_split(strtoupper($fingerprint),4);
-        $fingerprint="";
-        foreach ($arr as $a) {
-            $fingerprint .= $a .' ';
-        }
-        $uid=str_replace('<p>', '', dlt_html(shell_exec('var=$( cat DATA/tmp2.txt | head -n 3 | tail -n 1 ); var=${var:63}; echo ${var/:*/};')));
-        $var=shell_exec("rm -f DATA/tmp.txt DATA/tmp2.txt;");
-
-        if(trim($uid) != "" and trim($fingerprint) != ""){
-            $pubkey="<div class='verifybox'><table><tr><th colspan='2' style='color:#00ff00;'>Valid Public Key</th></tr><tr><td class='grey'>UID: </td><td>$uid</td></tr><tr><td class='grey'>Fingerprint: </td><td>$fingerprint</td></tr></table></div><div class='pubkeyarea'>".nl2br($pubkey)."</div>";
+        $metadata=getpgpmetadata($pubkey);
+        if(trim($metadata[0]) != "" and trim($metadata[1]) != ""){
+            $pubkey="<div class='verifybox'><table><tr><th colspan='2' style='color:#00ff00;'>Valid Public Key</th></tr><tr><td class='grey'>UID: </td><td>".$metadata[0]."</td></tr><tr><td class='grey'>Fingerprint: </td><td>".$metadata[1]."</td></tr></table></div><div class='pubkeyarea'>".nl2br($pubkey)."</div>";
         }
         else{
             $pubkey="<div class='verifybox'><table><tr><th colspan='2' style='color:#ff0000;'>Invalid Public Key</th></tr></table></div><div class='pubkeyarea'>".nl2br($pubkey)."</div>";

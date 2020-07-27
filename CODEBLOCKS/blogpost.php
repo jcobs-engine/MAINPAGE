@@ -34,10 +34,9 @@ if(strpos($post, $beginn_of_str) === 0 and preg_match("#$end_of_str$#",$post) an
     $out3=shell_exec("rm DATA/tmp*;");
     $out_lines=explode("\n", $out4);
     $sig_date=substr($out_lines[0], 20);
-    $sig_uid=substr($out_lines[2], 28, -1);
-    $sig_fingerprint=substr($out_lines[6], 24);
+    $metadata=getpgpmetadata($pubkey_user);
     if(strpos($out4,"gpg: Good signature")!==false){
-        $htmlpostprefix="<div class='verifybox'><table><tr><th colspan='2' style='color:#00ff00;cursor:pointer' onclick=\"if(ex1_$postid.style.display == 'none'){ex1_$postid.style.display='table-row';ex2_$postid.style.display='table-row';ex3_$postid.style.display='table-row';}else{ex1_$postid.style.display='none';ex2_$postid.style.display='none';ex3_$postid.style.display='none';}\">Valid Signature</th></tr><tr id='ex1_$postid' style='display:none'><td class='grey'>UID: </td><td>$sig_uid</td></tr><tr id='ex2_$postid' style='display:none'><td class='grey'>Fingerprint: </td><td>$sig_fingerprint</td></tr><tr id='ex3_$postid' style='display:none'><td class='grey'>Date: </td><td>$sig_date</td></tr></table></div>";
+        $htmlpostprefix="<div class='verifybox'><table><tr><th colspan='2' style='color:#00ff00;cursor:pointer' onclick=\"if(ex1_$postid.style.display == 'none'){ex1_$postid.style.display='table-row';ex2_$postid.style.display='table-row';ex3_$postid.style.display='table-row';}else{ex1_$postid.style.display='none';ex2_$postid.style.display='none';ex3_$postid.style.display='none';}\">Valid Signature</th></tr><tr id='ex1_$postid' style='display:none'><td class='grey'>UID: </td><td>".$metadata[0]."</td></tr><tr id='ex2_$postid' style='display:none'><td class='grey'>Fingerprint: </td><td>".$metadata[1]."</td></tr><tr id='ex3_$postid' style='display:none'><td class='grey'>Date: </td><td>$sig_date</td></tr></table></div>";
     }else{
         $htmlpostprefix="<div class='verifybox'><table><tr><th colspan='2' style='color:#ff0000;'>Invalid Signature</th></tr></table></div>";
     }
