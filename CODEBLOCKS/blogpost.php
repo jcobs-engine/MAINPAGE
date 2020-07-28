@@ -297,7 +297,7 @@ $post
                         $heartcursor='cursor:default;';
                     }
                                                                         
-                    echo "<div class='greytxt grey commentowner' $clickable_grey>".$row3[1]."</div>";
+                    echo "<div class='greytxt grey commentowner' $clickable_grey onclick=\"event.stopPropagation();site.value=1;catsite.value='user#".$row3[2]."';document.mainpage.submit();\">".$row3[1]."</div>";
 
                     if($row3[2] == $userid){
                         echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_".$row3[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_".$row3[3]."' onclick=\"deletecomment.value=".$row3[3].";document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
@@ -353,7 +353,7 @@ onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commen
                                 echo "<div class='post commentpost reply' onmouseover=\"this.style.borderLeft='2px solid #00ff00';this.style.backgroundColor='rgb(24%,24%,24%)';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='inline-block';replys{$commentid}_".$row4[3].".style.display='inline-block';replys2{$commentid}_".$row4[3].".style.display='inline-block';\" onmouseout=\"this.style.borderLeft='2px solid #ffffff';this.style.backgroundColor='transparent';mousebtns{$postid}_{$commentid}_".$row4[3].".style.display='none';mousebtns_2_{$postid}_{$commentid}_".$row4[3].".style.display='none';replys{$commentid}_".$row4[3].".style.display='none';replys2{$commentid}_".$row4[3].".style.display='none';\">";
                                                     
                                                     
-                                echo "<div class='greytxt grey commentowner' $clickable_grey>".$row4[1]."</div>";
+                                echo "<div class='greytxt grey commentowner' $clickable_grey onclick=\"event.stopPropagation();site.value=1;catsite.value='user#".$row4[2]."';document.mainpage.submit();\">".$row4[1]."</div>";
                                                     
                                 if($row4[2] == $userid){
                                     echo "<span class='grey' style='display:none;font-size:14px;' id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='mousebtns{$postid}_{$commentid}_".$row4[3]."' onclick=\"deletecomment.value='reply".$row4[3]."';document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</div>";
