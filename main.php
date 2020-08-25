@@ -678,8 +678,8 @@ But after an hour, all activity will be deleted.<p>
 <div id='header'>
 <img class='logo clickable' src='/DATA/logo_$version.png' onclick=\"catsite.value=0;site.value=0;document.mainpage.submit();\" onmouseover=\"this.src='/DATA/greenlogo_$version.png';\" onmouseout=\"this.src='/DATA/logo_$version.png';\">
 <!-- SITE NO. 1 --><div class='header_child' ".$clickable_txt1." onclick=\"catsite.value=0;site.value=1;document.mainpage.submit();\"><span style='border-bottom:${userpx}px solid #00ff00'>Users</span></div>
-<!-- SITE NO. 2 --><div class='header_child' ".$clickable_txt2." onclick=\"catsite.value=0;site.value=2;document.mainpage.submit();\"><span style='border-bottom:${grouppx}px solid #00ff00'>Groups</span></div>
-<!-- SITE NO. 3 --><div class='header_child' ".$clickable_txt3." onclick=\"catsite.value=0;site.value=3;document.mainpage.submit();\"><span style='border-bottom:${forumpx}px solid #00ff00'>Forums</span></div>
+<!-- SITE NO. 2 --><div style='display:none' class='header_child' ".$clickable_txt2." onclick=\"catsite.value=0;site.value=2;document.mainpage.submit();\"><span style='border-bottom:${grouppx}px solid #00ff00'>Groups</span></div>
+<!-- SITE NO. 3 --><div style='display:none' class='header_child' ".$clickable_txt3." onclick=\"catsite.value=0;site.value=3;document.mainpage.submit();\"><span style='border-bottom:${forumpx}px solid #00ff00'>Forums</span></div>
 <!-- SITE NO. 4 --><div class='header_child' ".$clickable_txt4." onclick=\"catsite.value=0;site.value=4;document.mainpage.submit();\"><span style='border-bottom:${blogpx}px solid #00ff00'>Blogs</span></div>
 </div>
 <div id='catheader'>
@@ -1051,7 +1051,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
         # $$$ SEARCH USER $$$ #
         if($catsite == '2'){
             $search=$_POST['search'];
-            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Username' value='$search' autofocus><input type='submit' name='searchbtn' class='btn' $clickable_btn value='search' style='margin-bottom:40px;'>";
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Username' value='$search' autofocus><input type='submit' name='searchbtn' class='btn' $clickable_btn value='search' style='margin-bottom:30px;'>";
 
             if($search == ''){
                 $searchstr='1=1';
@@ -1071,6 +1071,8 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
 
                 if($searchid != ""){
                     if($in == 0){
+                        echo "<div class='tableheader'><span>name</span><span style='float:right;'>subscriber</span></div>";
+                        
                         $fieldlistaddon="style='border-top:2px solid #ffffff;'";
                     }
                     else{
@@ -1110,6 +1112,8 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
          
                 if($searchid != ""){
                     if($in == 0){
+                        echo "<div class='tableheader'><span>name</span><span style='float:right;'>subscriber</span></div>";
+                        
                         $fieldlistaddon="style='border-top:2px solid #ffffff;'";
                     }
                     else{
@@ -1133,11 +1137,33 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
         }
     }
 
+    if($site == 3){
+        # $$$ ALL THREADS $$$ #
+        if($catsite == '0'){
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Forums</div><div class='rightbtn' $clickable_btn onclick=\"catsite.value='report#create_category';document.mainpage.submit();\">Create Category</div>";
+
+            echo "<div style='border-bottom:2px solid white;'></div>";
+            echo "<div class='listfield' $clickable_field onclick=\"catsite.value='category#-1';document.mainpage.submit();\">General</div>";
+            
+            
+            $sql="SELECT id, title WHERE type=0 ORDER by title;";
+            $out = mdq($bindung, $sql);
+            while ($row = mysqli_fetch_row($out)) {
+                $category_id=$row[0];
+                $category_title=$row[1];
+                echo "<div class='listfield' $clickable_field onclick=\"catsite.value='category#$category_id';document.mainpage.submit();\">$category_title</div>";                
+                
+            }
+
+            echo "</div>";
+        }
+    }
+    
     if($site == 4){
-        # $$$ SUBSCRIPTIONS $$$ #
+        # $$$ SUBSCRIPTIONS (BLOGS) $$$ #
         if($catsite == '0'){
             echo "<div class='artikel'><div class='title'><span class='white'>></span> Subscriptions</div><div class='rightbtn' $clickable_btn onclick=\"catsite.value=2;document.mainpage.submit();\">search</div>";
-
+            
             $in=0;
             $sql = "SELECT blogs.id, blogs.name, user.username, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)), 0) AS zahl, IF((MAX(blogposts.time)-MAX(timestamps.time))>0,1,0) AS reddit, user.id FROM blogs, user, blogposts, votes, subscriptions, timestamps WHERE blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND subscriptions.user=$userid AND timestamps.type=0 AND timestamps.type_id=blogs.id AND timestamps.user=$userid GROUP by blogs.id ORDER BY reddit desc, blogposts.id desc;";
             $out = mdq($bindung, $sql);
@@ -1156,6 +1182,8 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                 }
 
                 if($in == 0){
+                    echo "<div class='tableheader'><span>name</span><span style='float:right;'>average votes</span></div>";
+
                     $styleaddon.="border-top:2px solid #ffffff;";
                 }
 
@@ -1172,12 +1200,15 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
         if($catsite == '1'){
             echo "<div class='box' id='createblog' style='display:$createblogdisplay'><div class='title'><span class='white'>></span> Create Blog</div><div class='errorspan' style='display:$createblogerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_createblog</div><input type='text' maxlength='32' class='text' name='createblog_name' placeholder='Name'><input type='submit' name='createblog' class='btn' $clickable_btn value='create'></div><div class='artikel' id='myblogs' style='display:$blogsdisplay'><div class='title'><span class='white'>></span> My Blogs</div><div class='rightbtn' $clickable_btn onclick=\"createblog.style.display='block';myblogs.style.display='none';\">Create new</div>";
 
+            
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(blogposts.id)-COUNT(CASE WHEN blogposts.title='' THEN 1 END)), 0) AS zahl, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl2 FROM blogs, user, blogposts, votes, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl2 desc, blogposts.id desc;";
+            $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)), 0) AS zahl, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl2 FROM blogs, user, blogposts, votes, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl2 desc, blogposts.id desc;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
                 if($in == 0){
+                    echo "<div class='tableheader'><span>name</span><span style='float:right;'>average votes</span></div>";
+
                     $fieldlistaddon="style='border-top:2px solid #ffffff;'";
                 }
                 else{
@@ -1195,8 +1226,8 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
         # $$$ SEARCH BLOGS $$$ #
         if($catsite == '2'){
             $search=$_POST['search'];
-            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Blog, Post or User' value='$search' autofocus><input type='submit' name='searchbtn' class='btn' $clickable_btn value='search' style='margin-bottom:40px;'>";
-
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Search</div><input type='text' class='text' name='search' placeholder='Blog, Post or User' value='$search' autofocus><input type='submit' name='searchbtn' class='btn' $clickable_btn value='search' style='margin-bottom:30px;'>";
+            
             $end='';
             $searchstr='1=0';
             $searchstr2='1=0';
@@ -1232,6 +1263,8 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                 }
 
                 if($in == 0){
+                    echo "<div class='tableheader'><span>name</span><span style='float:right;'>average votes</span></div>";
+                    
                     $fieldlistaddon="style='border-top:2px solid #ffffff;'";
                 }
                 else{
@@ -1371,8 +1404,8 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
 <input type='hidden' name='deleteblogpost' id='deleteblogpost' value='0'>
 <input type='hidden' name='editblogpost' id='editblogpost' value='0'>
 <div class='artikel' id='newpost$blogid' style='display:none'><div class='title'><span class='white'>></span> New Post</div>
-<input type='text' name='newpost_title' class='text' placeholder='Title' maxlength='64'>
-<textarea name='newpost_text' class='textarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\">Text</textarea>
+<input type='text' name='newpost_title' class='text' placeholder='Title' maxlength='64' id='createposttitle'>
+<textarea name='newpost_text' class='textarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';createposttitle.required='required';\">Text</textarea>
 <input type='submit' name='newpost$blogid' value='create' class='btn' $clickable_btn>
 </div>";
                 }
