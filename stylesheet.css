@@ -6,28 +6,6 @@ body{
     font-family:'Source Code Pro', monospace;
 }
 
-table{
-    width:100%;
-    border-collapse: collapse;
-    border-spacing: 0;
-    margin-bottom:20px;
-}
-
-td,th{
-    margin:0;
-    padding:8px;
-    border:1px solid rgba(100%, 100%, 100%, 0.3);
-}
-
-th{
-    background-color:rgba(100%, 100%, 100%, 0.1);
-    text-align:left;
-}
-
-.emoji{
-    width:1em;
-}
-
 #header{
     position:fixed;
     top:0px;
@@ -770,6 +748,14 @@ th{
     font-style:italic;
 }
 
+.tableheader{
+    color:grey;
+    font-size:14px;
+    padding-left:20px;
+    padding-right:20px;
+    margin-bottom:5px;
+}
+
 /* PARSEDOWN */
 
 .PARSEDOWN_codeblock{
@@ -778,4 +764,48 @@ th{
     width:calc(100% - 30px);
     padding:10px;
     border-radius:5px;
+}
+
+table{
+    width:100%;
+    border-collapse: collapse;
+    border-spacing: 0;
+    margin-bottom:20px;
+}
+
+td,th{
+    margin:0;
+    padding:8px;
+    border:1px solid rgba(100%, 100%, 100%, 0.3);
+}
+
+th{
+    background-color:rgba(100%, 100%, 100%, 0.1);
+    text-align:left;
+}
+
+.emoji{
+    width:1em;
+}
+
+blockquote{
+    border-left:2px solid rgba(100%, 100%, 100%, 0.2);
+    padding-left:15px;
+    color:rgba(100%, 100%, 100%, 0.8);
+    margin-left:25px;
+}
+
+hr:not(.commentline){
+    margin-top:25px;
+    margin-bottom:25px;
+    border:1px solid rgba(100%, 100%, 100%, 0.8);
+    border-radius:1px;
+}
+
+code{
+    background-color:rgba(100%, 100%, 100%, 0.2);
+    padding:1px;
+    padding-left:3px;
+    padding-right:3px;
+    border-radius:2px;
 }
