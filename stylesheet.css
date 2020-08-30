@@ -426,6 +426,7 @@ body{
     border:1px solid #ffffff;
     cursor:pointer;
     font-size:14px;
+    color:#ffffff;
 }
 
 .linkbox{
@@ -754,6 +755,27 @@ body{
     padding-left:20px;
     padding-right:20px;
     margin-bottom:5px;
+}
+
+.setup_blog_symbol{
+    position:absolute;
+    top:12px;
+    right:20px;
+    height:25px;
+    cursor:pointer;
+}
+
+.withsettings{
+    right:65px;
+}
+
+.close_button{
+    position:absolute;
+    top:15px;
+    right:18px;
+    height:25px;
+    cursor:pointer;
+    opacity:0.7;
 }
 
 /* PARSEDOWN */

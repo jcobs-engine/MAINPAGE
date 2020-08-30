@@ -226,7 +226,7 @@ $(window).scroll(function() {
 });
 
 $(document).ready(function() {
-  if (sessionStorage.scrollTop != 'undefined') {
+  if (sessionStorage.scrollTop != 'undefined' && ( catsite.value == oldcatsite.value || catsite.value.match('report') == 'report' || oldcatsite.value.match('report') == 'report')) {
     $(window).scrollTop(sessionStorage.scrollTop);
   }
 });
@@ -702,7 +702,7 @@ But after an hour, all activity will be deleted.<p>
             $out = mdq($bindung, $sql);
         }
     }
-    
+
     if(isset($_POST['editprofile']) and $_POST['editusername'] != ""){
         $editusername=$_POST['editusername'];
         $editpassword=$_POST['editpassword'];
@@ -1095,7 +1095,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
         }
         # $$$ SUBSCRIPTIONS (USER) $$$ #
         if($catsite == 1){
-            echo "<div class='artikel'><div class='title'><span class='white'>></span> Subscriptions</div>";
+            echo "<div class='artikel'><div class='title'><span class='white'>></span> Subscriptions</div><div class='rightbtn' $clickable_btn onclick=\"catsite.value=2;document.mainpage.submit();\">search</div>";
 
             $in=0;
             $sql = "SELECT user.id, user.username FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND subscriptions.user=$userid GROUP by user.id ORDER BY user.username;";
@@ -1198,14 +1198,25 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
         }
         # $$$ MY BLOGS $$$ #
         if($catsite == '1'){
-            echo "<div class='box' id='createblog' style='display:$createblogdisplay'><div class='title'><span class='white'>></span> Create Blog</div><div class='errorspan' style='display:$createblogerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_createblog</div><input type='text' maxlength='32' class='text' name='createblog_name' placeholder='Name'><input type='submit' name='createblog' class='btn' $clickable_btn value='create'></div><div class='artikel' id='myblogs' style='display:$blogsdisplay'><div class='title'><span class='white'>></span> My Blogs</div><div class='rightbtn' $clickable_btn onclick=\"createblog.style.display='block';myblogs.style.display='none';\">Create new</div>";
+            echo "<div class='box' id='createblog' style='display:$createblogdisplay'><div class='title'><span class='white'>></span> Create Blog</div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"createblog.style.display='none';myblogs.style.display='block';\"><div class='errorspan' style='display:$createblogerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_createblog</div><input type='text' maxlength='32' class='text' name='createblog_name' placeholder='Name'><input type='submit' name='createblog' class='btn' $clickable_btn value='create'></div><div class='artikel' id='myblogs' style='display:$blogsdisplay'><div class='title'><span class='white'>></span> My Blogs</div><div class='rightbtn' $clickable_btn onclick=\"createblog.style.display='block';myblogs.style.display='none';\">Create new</div>";
 
             
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)), 0) AS zahl, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl2 FROM blogs, user, blogposts, votes, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl2 desc, blogposts.id desc;";
+            $sql = "SELECT blogs.id, blogs.name, COUNT(DISTINCT subscriptions.id)-1 AS zahl FROM blogs, user, blogposts, subscriptions WHERE blogposts.blog=blogs.id AND blogs.owner=user.id AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
+
+                $votes='';
+                $sql = "SELECT ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT( DISTINCT blogposts.id)), 0) AS zahl FROM blogs, blogposts, votes WHERE blogs.id=$blogid AND blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id GROUP by blogs.id;";
+                $out2 = mdq($bindung, $sql);
+                while ($row2 = mysqli_fetch_row($out2)) {
+                    $votes=$row2[0];
+                }
+                if($votes == ''){
+                    $votes=0;
+                }
+                
                 if($in == 0){
                     echo "<div class='tableheader'><span>name</span><span style='float:right;'>average votes</span></div>";
 
@@ -1214,7 +1225,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                 else{
                     $fieldlistaddon="";
                 }
-                echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$row[1]<span class='vote right bold' style='padding-top:0px;'>$row[2]</span></div>";
+                echo "<div class='listfield' $clickable_field $fieldlistaddon onclick=\"catsite.value='blog#$blogid';document.mainpage.submit();\">$row[1]<span class='vote right bold' style='padding-top:0px;'>$votes</span></div>";
                 $in=1;
             }
 
@@ -1245,7 +1256,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
             }
 
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl, user.id FROM blogs, user, blogposts, votes, subscriptions WHERE blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND ($searchstr) GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc$end;";
+            $sql = "SELECT blogs.id, blogs.name, user.username, COUNT(DISTINCT subscriptions.id)-1 AS zahl, user.id FROM blogs, user, blogposts, votes, subscriptions WHERE blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND ($searchstr) GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc$end;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
@@ -1363,6 +1374,11 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
             $out = mdq($bindung, $sql);
         }
 
+        if(isset($_POST['editblog'.$blogid]) and $blogowner == $userid and ctype_alnum(str_replace('-', 'A', $_POST['editblogname']))){
+            $sql = "UPDATE blogs SET name='".$_POST['editblogname']."' WHERE blogs.id=$blogid;";
+            $out = mdq($bindung, $sql);
+        }
+        
         if($_POST['editblogpost'] != 0 and $blogowner == $userid){
             $sql = "SELECT title, post FROM blogposts WHERE id=".$_POST['editblogpost'].";";
             $out = mdq($bindung, $sql);
@@ -1370,7 +1386,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                 $editblog_title=$row[0];
                 $editblog_post=$row[1];
             }
-            echo "<input type='hidden' name='editblogpostid' value='".$_POST['editblogpost']."'><div class='artikel'><div class='title'><span class='white'>></span> Edit Post</div><input type='text' name='editpost_title' class='text' placeholder='Title' maxlength='64' value='$editblog_title' required><textarea name='editpost_text' class='textarea'>$editblog_post</textarea><input type='submit' name='editpost$blogid' value='edit' class='btn' $clickable_btn></div>";
+            echo "<input type='hidden' name='editblogpostid' value='".$_POST['editblogpost']."'><div class='artikel'><div class='title'><span class='white'>></span> Edit Post</div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"document.mainpage.submit();\"><input type='text' name='editpost_title' class='text' placeholder='Title' maxlength='64' value='$editblog_title' required><textarea name='editpost_text' class='textarea'>$editblog_post</textarea><input type='submit' name='editpost$blogid' value='edit' class='btn' $clickable_btn></div>";
             
         }
         else{
@@ -1398,21 +1414,70 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                 $blogname=$row[0];
                 $blogowner=$row[1];
                 $blogownerid=$row[2];
+
+                $sql = "SELECT ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT( DISTINCT blogposts.id)), 0) AS zahl, COUNT( DISTINCT blogposts.id) FROM blogs, blogposts, votes WHERE blogs.id=$blogid AND blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogposts.title!='' GROUP by blogs.id;";
+                $out2 = mdq($bindung, $sql);
+                while ($row2 = mysqli_fetch_row($out2)) {
+                    $bloginfo_votes=$row2[0];
+                    $bloginfo_posts=$row2[1];
+                    if($bloginfo_votes == ''){
+                        $bloginfo_votes=0;
+                    }
+                }
+
+                $sql = "SELECT COUNT(DISTINCT subscriptions.id)-1 FROM blogs, subscriptions WHERE blogs.id=$blogid AND subscriptions.type=0 AND subscriptions.type_id=blogs.id GROUP by blogs.id;";
+                $out2 = mdq($bindung, $sql);
+                while ($row2 = mysqli_fetch_row($out2)) {
+                    $bloginfo_subs=$row2[0];
+                }
                 
                 if($blogownerid == $userid){
                     echo "
 <input type='hidden' name='deleteblogpost' id='deleteblogpost' value='0'>
 <input type='hidden' name='editblogpost' id='editblogpost' value='0'>
-<div class='artikel' id='newpost$blogid' style='display:none'><div class='title'><span class='white'>></span> New Post</div>
+<div class='artikel' id='newpost$blogid' style='display:none'><div class='title'><span class='white'>></span> New Post</div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"newpost$blogid.style.display='none';blog$blogid.style.display='block';\">
 <input type='text' name='newpost_title' class='text' placeholder='Title' maxlength='64' id='createposttitle'>
 <textarea name='newpost_text' class='textarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';createposttitle.required='required';\">Text</textarea>
 <input type='submit' name='newpost$blogid' value='create' class='btn' $clickable_btn>
 </div>";
+                    $settingsdisplay='none';
+                    $blogdisplay='block';
+                    $editblog_errorspan='none';
+                    if(isset($_POST['editblog'.$blogid]) and !ctype_alnum(str_replace('-', 'A', $_POST['editblogname']))){
+                        $ERROR_editblog='The name must consist only of characters, minuses and/or digits';
+                        $settingsdisplay='block';
+                        $blogdisplay='none';
+                        $editblog_errorspan='block';
+                    }
+                        
+                    echo "<div class='artikel' id='settings$blogid' style='display:$settingsdisplay'><div class='title'><span class='white'>></span> Settings</div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"settings$blogid.style.display='none';blog$blogid.style.display='block';\">
+<div class='errorspan' style='display:$editblog_errorspan;'><b class='errorspan_arz'>!</b> $ERROR_editblog</div>
+<input type='text' name='editblogname' class='text' placeholder='Name' maxlength='32' id='editblogname' value='$blogname'>
+<input type='submit' name='editblog$blogid' value='edit' class='btn' $clickable_btn><p>
+<div style='border-bottom:2px solid white;margin-top:35px;'></div>
+<div class='listfield' id='lastkd' style='cursor:pointer;' $clickable_field onclick=\"site.value=1;catsite.value='user#$blogownerid';document.mainpage.submit();\"><span>Owner</span><span class='right bold' style='margin-top:-5px;'>$blogowner</span></div>
+<div class='listfield' id='lastkd' style='cursor:default;' $clickable_field><span>Average Votes</span><span class='right bold' style='margin-top:-5px;'>$bloginfo_votes</span></div>
+<div class='listfield' id='lastkd' style='cursor:default;' $clickable_field><span>Posts</span><span class='right bold' style='margin-top:-5px;'>$bloginfo_posts</span></div>
+<div class='listfield' id='lastkd' style='cursor:default;margin-bottom:25px;' $clickable_field><span>Subscriber</span><span class='right bold' style='margin-top:-5px;'>$bloginfo_subs</span></div>
+<p>
+<input type='button' onclick=\"copymessage.style.display='block';copyfield.innerHTML='<div class=&quot;btn&quot; style=&quot;line-height:normal;width:500px;position:absolute;left:calc(50% - 250px);&quot; ".str_replace('"', '&quot;', str_replace("'", "\'", str_replace("#00ff00", "#ff0000", $clickable_btn)))." onclick=\'deleteblog.value=$blogid;document.mainpage.submit();\'>Really Delete Blog</div>';\" value='Delete Blog' class='btn' ".str_replace('#00ff00', '#ff0000', $clickable_btn).">
+</div>";
                 }
-                
-                echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid'><div class='title'><span class='white'>></span> $blogname<img src='/DATA/link.png' title='$URL_domain/content/$blogowner/$blogname' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname';\"> <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$blogownerid';document.mainpage.submit();\">$blogowner</span></span></div>";
+
+                echo "<div class='box' id='infos$blogid' style='display:none'><div class='title'><span class='white'>></span> Information</div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"infos$blogid.style.display='none';blog$blogid.style.display='block';\">
+<div style='border-bottom:2px solid white;margin-top:35px;'></div>
+<div class='listfield clickable' id='lastkd' style='cursor:pointer;' $clickable_field onclick=\"site.value=1;catsite.value='user#$blogownerid';document.mainpage.submit();\"><span>Owner</span><span class='right bold' style='margin-top:-5px;'>$blogowner</span></div>
+<div class='listfield' id='lastkd' style='cursor:default;' $clickable_field><span>Average Votes</span><span class='right bold' style='margin-top:-5px;'>$bloginfo_votes</span></div>
+<div class='listfield' id='lastkd' style='cursor:default;' $clickable_field><span>Posts</span><span class='right bold' style='margin-top:-5px;'>$bloginfo_posts</span></div>
+<div class='listfield' id='lastkd' style='cursor:default;margin-bottom:25px;' $clickable_field><span>Subscriber</span><span class='right bold' style='margin-top:-5px;'>$bloginfo_subs</span></div>
+<p><input type='button' onclick=\"catsite.value='report#blog:$blogid';document.mainpage.submit();\" value='Report Blog' class='btn' ".str_replace('#00ff00', '#ff0000', $clickable_btn).">
+</div>";
+
+                echo "<input type='hidden' name='subscribe' id='subscribe' value='0'><input type='hidden' name='unsubscribe' id='unsubscribe' value='0'><div class='artikel' id='blog$blogid' style='display:$blogdisplay'><div class='title'><span class='white'>></span> $blogname<img src='/DATA/link.png' title='$URL_domain/content/$blogowner/$blogname' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$blogowner/$blogname';\"> <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$blogownerid';document.mainpage.submit();\">$blogowner</span></span></div>";
                 if($blogownerid == $userid){
-                    echo "<div class='rightbtn' $clickable_btn onclick=\"newpost$blogid.style.display='block';blog$blogid.style.display='none';\">New post</div>";
+                    echo "<div class='rightbtn withsettings' $clickable_btn onclick=\"newpost$blogid.style.display='block';blog$blogid.style.display='none';\">New post</div>";
+
+                    echo "<img src='DATA/settings.png' class='setup_blog_symbol' $clickable_settings onclick=\"settings$blogid.style.display='block';blog$blogid.style.display='none';\">";
                 }
                 else{
                     $sub=0;
@@ -1422,9 +1487,10 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                         $sub=1;
                     }
                     if($sub == 0)
-                        echo "<div class='rightbtn' $clickable_btn onclick=\"subscribe.value=$blogid;document.mainpage.submit();\">subscribe</div>";
+                        echo "<div class='rightbtn withsettings' $clickable_btn onclick=\"subscribe.value=$blogid;document.mainpage.submit();\">subscribe</div>";
                     else
-                        echo "<div class='rightbtn' $clickable_btn onclick=\"unsubscribe.value=$blogid;document.mainpage.submit();\">unsubscribe</div>";
+                        echo "<div class='rightbtn withsettings' ".str_replace('#00ff00', '#ff0000', $clickable_btn)." onclick=\"unsubscribe.value=$blogid;document.mainpage.submit();\">unsubscribe</div>";
+                    echo "<img src='DATA/dotsmenu.png' class='setup_blog_symbol' ".str_replace('settings.png', 'dotsmenu.png', str_replace('settings_green.png', 'dotsmenu_green.png', $clickable_settings))." onclick=\"infos$blogid.style.display='block';blog$blogid.style.display='none';\">";
                 }
 
                 $gtb=explode('_', $_POST['gt_blogpost']);
@@ -1457,10 +1523,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                     echo "<center>=== NO POSTS ===</center>";
 
                 if($blogownerid == $userid){
-                    echo "<input type='hidden' name='deleteblog' id='deleteblog' value='0'><span class='right greytxt' onclick=\"deleteblog.value=$blogid;document.mainpage.submit();\" ".str_replace('#00ff00', '#ff0000', $clickable_txt).">delete blog</span><br>";
-                }
-                else{
-                    echo "<span class='right greytxt' onclick=\"catsite.value='report#blog:$blogid';document.mainpage.submit();\" ".str_replace('#00ff00', '#ff0000', $clickable_txt).">report blog</span><br>";
+                    echo "<input type='hidden' name='deleteblog' id='deleteblog' value='0'>";
                 }
                 
                 # END OF BLOG (CLASS=ARTIKEL) #
@@ -1549,7 +1612,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
             }
             if($in == 1){
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">$reportblogname</span> by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">$reportblogname</span> by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogowner</span></span></div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">
 <textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
                     
                     echo "<input type='hidden' name='reportuser' id='reportuser' value='0'>
@@ -1560,7 +1623,7 @@ echo "<input type='submit' name='report' class='btn' value='report' $clickable_b
 </div>";
             }else{
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">$reportblogname</span> by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Blog <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">$reportblogname</span> by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogowner</span></span></div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"site.value=4;catsite.value='blog#$reportid';document.mainpage.submit();\">
 
 Blog already reported. See Votings.<p>
 
@@ -1571,11 +1634,12 @@ Blog already reported. See Votings.<p>
 
         if($reportype == 'blogpost'){
             $in=0;
-            $sql = "SELECT user.username, user.id FROM blogposts, blogs, user WHERE user.id=blogs.owner AND blogs.id=blogposts.blog AND blogposts.id=$reportid;";
+            $sql = "SELECT user.username, user.id, blogs.id FROM blogposts, blogs, user WHERE user.id=blogs.owner AND blogs.id=blogposts.blog AND blogposts.id=$reportid;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $reportblogpostowner=$row[0];
-                $profileid=$row[1];                
+                $profileid=$row[1];
+                $specificblog=$row[2];                
                 $in=1;
             }
                 
@@ -1586,7 +1650,7 @@ Blog already reported. See Votings.<p>
             }
             if($in == 1){
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogpostowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogpostowner</span></span></div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"site.value=4;catsite.value='blog#$specificblog';document.mainpage.submit();\">
 <textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
                     
                     echo "<input type='hidden' name='reportuser' id='reportuser' value='0'>
@@ -1597,7 +1661,7 @@ echo "<input type='submit' name='report' class='btn' value='report' $clickable_b
 </div>";
             }else{
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogpostowner</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report Post <span class='grey'>by <span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportblogpostowner</span></span></div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"site.value=4;catsite.value='blog#$specificblog';document.mainpage.submit();\">
 
 Post already reported. See Votings.<p>
 
@@ -1625,13 +1689,13 @@ Post already reported. See Votings.<p>
             }
             if($in == 1){
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report User <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportusername</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report User <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportusername</span></span></div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"site.value=4;catsite.value='user#$reportid';document.mainpage.submit();\">
 <textarea class='textarea commentarea reporttextbox' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='reportdescription'>Write description</textarea>";
                     
                     echo "<input type='submit' name='report' class='btn' value='report' $clickable_btn></div>";
             }else{
                 echo "
-<div class='box'><div class='title'><span class='white'>></span> Report User <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportusername</span></span></div>
+<div class='box'><div class='title'><span class='white'>></span> Report User <span class='grey'><span $clickable_grey class='clickable bold' onclick=\"event.stopPropagation();site.value=1;catsite.value='user#$profileid';document.mainpage.submit();\">$reportusername</span></span></div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"site.value=4;catsite.value='user#$reportid';document.mainpage.submit();\">
 
 User already reported. See Votings.<p>
 
@@ -1645,11 +1709,13 @@ User already reported. See Votings.<p>
 }
 
 echo "
-<div id='copymessage' style='display:none;' onclick=\"this.style.display='none';\"><div id='copyfield' onclick=\"event.stopPropagation();\"></div></div>
+<div id='copymessage' style='display:none;' onclick=\"this.style.display='none';\"><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"copymessage.style.display='none';\"><div id='copyfield' onclick=\"event.stopPropagation();\"></div></div>
 
 <input type='hidden' name='gt_blogpost' id='gt_blogpost' value='".$_POST['gt_blogpost']."'>
 <input type='hidden' name='votebackbtn' id='votebackbtn' value='0'>
 <input type='hidden' name='catsite' id='catsite' value='$catsite'>
+<input type='hidden' name='catsitecopy' id='catsitecopy' value='$catsite'>
+<input type='hidden' name='oldcatsite' id='oldcatsite' value='".$_POST['catsitecopy']."'>
 <input type='hidden' name='site' id='site' value='$site'>
 <input type='hidden' name='userid' id='userid' value='$userid'>
 <input type='hidden' name='username' id='username' value='$username'>
