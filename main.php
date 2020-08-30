@@ -1165,7 +1165,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
             echo "<div class='artikel'><div class='title'><span class='white'>></span> Subscriptions</div><div class='rightbtn' $clickable_btn onclick=\"catsite.value=2;document.mainpage.submit();\">search</div>";
             
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, user.username, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)), 0) AS zahl, IF((MAX(blogposts.time)-MAX(timestamps.time))>0,1,0) AS reddit, user.id FROM blogs, user, blogposts, votes, subscriptions, timestamps WHERE blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND subscriptions.user=$userid AND timestamps.type=0 AND timestamps.type_id=blogs.id AND timestamps.user=$userid GROUP by blogs.id ORDER BY reddit desc, blogposts.id desc;";
+            $sql = "SELECT blogs.id, blogs.name, user.username, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(DISTINCT blogposts.id)), 0) AS zahl, IF((MAX(blogposts.time)-MAX(timestamps.time))>0,1,0) AS reddit, user.id FROM blogs, user, blogposts, votes, subscriptions, timestamps WHERE blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND subscriptions.user=$userid AND timestamps.type=0 AND timestamps.type_id=blogs.id AND timestamps.user=$userid GROUP by blogs.id ORDER BY reddit desc, MAX(blogposts.id) desc;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
@@ -1202,7 +1202,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
 
             
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, COUNT(DISTINCT subscriptions.id)-1 AS zahl FROM blogs, user, blogposts, subscriptions WHERE blogposts.blog=blogs.id AND blogs.owner=user.id AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc;";
+            $sql = "SELECT blogs.id, blogs.name, COUNT(DISTINCT subscriptions.id)-1 AS zahl FROM blogs, user, blogposts, subscriptions WHERE blogposts.blog=blogs.id AND blogs.owner=user.id AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND user.id=$userid GROUP by blogs.id ORDER BY zahl desc, MAX(blogposts.id) desc;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
@@ -1256,7 +1256,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
             }
 
             $in=0;
-            $sql = "SELECT blogs.id, blogs.name, user.username, COUNT(DISTINCT subscriptions.id)-1 AS zahl, user.id FROM blogs, user, blogposts, votes, subscriptions WHERE blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND ($searchstr) GROUP by blogs.id ORDER BY zahl desc, blogposts.id desc$end;";
+            $sql = "SELECT blogs.id, blogs.name, user.username, COUNT(DISTINCT subscriptions.id)-1 AS zahl, user.id FROM blogs, user, blogposts, votes, subscriptions WHERE blogs.id=votes.type_catid AND votes.type_id=blogposts.id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND blogposts.title!='' AND subscriptions.type=0 AND subscriptions.type_id=blogs.id AND ($searchstr) GROUP by blogs.id ORDER BY zahl desc, MAX(blogposts.id) desc$end;";
             $out = mdq($bindung, $sql);
             while ($row = mysqli_fetch_row($out)) {
                 $blogid=$row[0];
