@@ -63,6 +63,7 @@ function getpgpmetadata($pubkey){
 
 
 $clickable_txt="onmouseover=\"this.style.color='#00ff00';\" onmouseout=\"this.style.color='#ffffff';\"";
+$clickable_opencomments="onmouseover=\"this.style.color='#00ff00';%POSTID%.src='/DATA/einklappen_green.png';\" onmouseout=\"this.style.color='#ffffff';%POSTID%.src='/DATA/einklappen.png';\"";
 $clickable_greentxt="onmouseover=\"this.style.color='#ffffff';\" onmouseout=\"this.style.color='#00ff00';\"";
 $clickable_btn="onmouseover=\"this.style.backgroundColor='#00ff00';\" onmouseout=\"this.style.backgroundColor='#ffffff';\"";
 $clickable_field="onmouseover=\"this.style.backgroundColor='rgb(8%,8%,8%)';this.style.color='#00ff00';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';\"";
@@ -73,7 +74,10 @@ $clickable_votingbtn_green="onmouseover=\"this.style.color='#00ff00';this.style.
 $clickable_votingbtn_red="onmouseover=\"this.style.color='#ff0000';this.style.backgroundColor='#000000';\" onmouseout=\"this.style.backgroundColor='#ffffff';this.style.color='#000000';\"";
 $clickable_showbtn="onmouseover=\"this.style.backgroundColor='#ffffff';\" onmouseout=\"this.style.backgroundColor='rgba(100%, 100%, 100%, 0.4)';\"";
 $clickable_linkicon="onmouseover=\"this.style.opacity='1';\" onmouseout=\"this.style.opacity='0.4';\"";
-    
+$clickable_settings="onmouseover=\"this.src='DATA/settings_green.png';\" onmouseout=\"this.src='DATA/settings.png';\"";
+$clickable_heart_optional="onmouseover=\"this.style.backgroundColor='#00ff00';this.style.border='1px solid #00ff00';this.style.color='#000000';heart%HEARTID%.style.filter='invert(1)';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';heart%HEARTID%.style.filter='invert(0)';this.style.border='1px solid #ffffff';\"";
+$clickable_close="onmouseover=\"this.style.opacity='1';\" onmouseout=\"this.style.opacity='0.7';\"";
+
 $clickable_votingbtn_green_cap=$clickable_votingbtn_green;
 $clickable_votingbtn_red_cap=$clickable_votingbtn_red;
 

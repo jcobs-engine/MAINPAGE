@@ -140,7 +140,7 @@ if($postid != ''){
 <div class='pnts' style='$style$block' onmouseover=\"{$block}this.style.display='none';{$block}voteup_$postid.style.display='block';{$block}votedown_$postid.style.display='block';\" id='pnts$postid'>$votes</div>";
 
         if($blogownerid == $userid and $SETTING['trenddesign'] == 0){
-            echo "<div id='mousebtns$postid' style='display:none'><span class='grey greytxt right' onclick=\"deleteblogpost.value=$postid;document.mainpage.submit();\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</span><span class='grey greytxt right' onclick=\"editblogpost.value=$postid;document.mainpage.submit();\" $clickable_grey>edit</span></div>
+            echo "<div id='mousebtns$postid' style='display:none'><span class='grey greytxt right' onclick=\"copymessage.style.display='block';copyfield.innerHTML='<div class=&quot;btn&quot; style=&quot;line-height:normal;width:500px;position:absolute;left:calc(50% - 250px);&quot; ".str_replace('"', '&quot;', str_replace("'", "\'", str_replace("#00ff00", "#ff0000", $clickable_btn)))." onclick=\'deleteblogpost.value=$postid;document.mainpage.submit();\'>Really Delete Post</div>';\" ".str_replace('#ffffff', '#ff0000', $clickable_grey).">delete</span><span class='grey greytxt right' onclick=\"editblogpost.value=$postid;document.mainpage.submit();\" $clickable_grey>edit</span></div>
 
 <span id='TRUEthis'></span><span id='TRUEvoteup_$postid'></span><span id='TRUEvotedown_$postid'></span><span id='TRUEpnts$postid'></span>";
         }
@@ -183,7 +183,7 @@ $post
 <span class='greytxt grey right' $clickable_grey style='display:none;' id='bubbleview$postid' onclick=\"if(textpost$postid.style.display == 'none'){ textpost$postid.style.display='block';htmlpost$postid.style.display='none';this.innerHTML='HTML-view'; }else{ textpost$postid.style.display='none';htmlpost$postid.style.display='block';this.innerHTML='source-view'; }\">source-view</span>
 
 <hr class='commentline'>
-<div class='opencomments' $clickable_txt onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='/DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
+<div class='opencomments' ".str_replace('%POSTID%', 'einklappen'.$postid, $clickable_opencomments)." onclick=\"if(comments$postid.style.display == 'none'){commentstat.value='$postid';comments$postid.style.display='block';einklappen$postid.style.transform='rotate(0deg)';}else{commentstat.value='0';comments$postid.style.display='none';einklappen$postid.style.transform='rotate(180deg)';}\"><img src='/DATA/einklappen.png' class='einklappen' id='einklappen$postid' style='$commentarrow_stylechanges'>$commentscount comment$commentplural</div>
 <div class='comments' id='comments$postid' style='display:".$commentboxdisplay[$postid].";'>";
         if($blogownerid != $userid and $SETTING['contentdesign'] != 1){
             echo "<textarea id='commentarea$postid' class='textarea commentarea' style='color:grey;' onfocus=\"this.innerHTML='';this.style.color='#ffffff';\" name='commenttext$postid'>Write comment</textarea>
@@ -281,11 +281,11 @@ $post
                     $heartcursor='';
 
                     if($row3[2] != $userid){
-                        $clickable_heart="onmouseover=\"this.style.backgroundColor='#ffffff';this.style.color='#000000';heart".$row3[3].".style.filter='invert(1)';\" onmouseout=\"this.style.backgroundColor='transparent';this.style.color='#ffffff';heart".$row3[3].".style.filter='invert(0)';\"";
+                        $clickable_heart=str_replace('%HEARTID%', $row3[3], $clickable_heart_optional);
                     }
                     else{
                         $clickable_heart='';
-                        $full='_full';
+                        $full='_full_white';
                         $heartcursor='cursor:default;';
                     }
                                     
@@ -313,7 +313,7 @@ $post
 
                     ### <------- REPLYS -------> ##
                                         
-                    echo "<hr class='commentline' id='replyline$commentid' $zeroreplysaddon><div class='opencomments' id='opencomments$commentid' $zeroreplysaddon $clickable_txt 
+                    echo "<hr class='commentline' id='replyline$commentid' $zeroreplysaddon><div class='opencomments' id='opencomments$commentid' $zeroreplysaddon ".str_replace('%POSTID%', 'reply_einklappen'.$commentid, $clickable_opencomments)." 
 
 onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';}else{replystat.value='0';replycontent$commentid.style.display='none';reply_einklappen$commentid.style.transform='rotate(180deg)';}\"
 

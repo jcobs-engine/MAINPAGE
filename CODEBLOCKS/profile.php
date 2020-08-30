@@ -8,7 +8,7 @@ echo "<div id='kd$kdid' style='border-bottom:2px solid white;'></div>";
 
 # BLOGS #
 $in=0;
-$sql = "SELECT id FROM blogs WHERE owner=$profileid;";
+$sql = "SELECT blogs.id FROM blogs, blogposts WHERE blogs.owner=$profileid AND blogs.id=blogposts.blog AND blogposts.title!='';";
 $out = mdq($bindung, $sql);
 while ($row = mysqli_fetch_row($out)) {
     $in=1;
@@ -21,7 +21,7 @@ if($in == 1){
     echo "</div><div class='klappdivcontentbox' id='kdc$kdid' style='display:none;'>";
     echo "<div id='kdroh$kdid'>";
     $in2=0;
-    $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(blogposts.id)-COUNT(CASE WHEN blogposts.title='' THEN 1 END)), 0) AS zahl, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl2 FROM blogs, user, blogposts, votes, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.id=votes.type_id AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$profileid GROUP by blogs.id ORDER BY zahl2 desc, blogposts.id desc;";
+    $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(blogposts.id)-COUNT(CASE WHEN blogposts.title='' THEN 1 END)), 0) AS zahl, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl2 FROM blogs, user, blogposts, votes, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.id=votes.type_id AND blogposts.title!='' AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$profileid GROUP by blogs.id ORDER BY zahl2 desc, blogposts.id desc;";
     $out = mdq($bindung, $sql);
     while ($row = mysqli_fetch_row($out)) {
         $blogid=$row[0];
