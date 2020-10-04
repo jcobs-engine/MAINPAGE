@@ -1603,7 +1603,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
             if($sub == 0)
                 echo "<div class='rightbtn' $clickable_btn onclick=\"subscribe.value=$profileid;document.mainpage.submit();\">subscribe</div>";
             else
-                echo "<div class='rightbtn' $clickable_btn onclick=\"unsubscribe.value=$profileid;document.mainpage.submit();\">unsubscribe</div>";
+                echo "<div class='rightbtn' ".str_replace('#00ff00', '#ff0000', $clickable_btn)." onclick=\"unsubscribe.value=$profileid;document.mainpage.submit();\">unsubscribe</div>";
         }
         
 
