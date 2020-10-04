@@ -21,12 +21,6 @@ function umlaute($post){
     $post=str_replace('ß', '&#223;', $post);
     $post=str_replace('ẞ', '&#7838;', $post);
 
-    $emojis=json_decode(shell_exec("cat github_emojis.json"));
-    
-    foreach( $emojis AS $emoji_txt => $emoji_url){
-        $post=str_replace(':'.$emoji_txt.':', '<img src="'.$emoji_url.'" class="emoji">', $post);
-    }
-    
     return $post;
 }
 
@@ -61,6 +55,48 @@ function getpgpmetadata($pubkey){
     return $return;
 }
 
+function parsehtml($post, $postid, $bindung, $type, $clickable_btn){
+    $post=umlaute($post);
+    
+    if($type == 'post'){
+    $post=Parsedown::instance()
+         ->setBreaksEnabled(true)
+         ->text($post);
+}else{
+        $post=Parsedown::instance()
+         ->setBreaksEnabled(true)
+         ->line($post);
+}
+
+    $post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $post);
+    $post=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $post);
+
+    $i=1000;
+    while ( $i > 0 ){
+        $post=str_replace('[^'.$i.']:', "<a name='f_{$type}{$postid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $post);
+        $post=str_replace('[^'.$i.']', "<a href='#f_{$type}{$postid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $post);
+        $i--;
+    }
+
+    $emojis=json_decode(shell_exec("cat github_emojis.json"));
+    
+    foreach( $emojis AS $emoji_txt => $emoji_url){
+        $post=str_replace(':'.$emoji_txt.':', '<img src="'.$emoji_url.'" class="emoji">', $post);
+    }
+
+    $sql="select username, id FROM user WHERE timeout=0 ORDER BY LENGTH(username) desc;";
+    $out = mdq($bindung, $sql);
+    while ($row = mysqli_fetch_row($out)) {
+        $post=str_ireplace('@'.$row[0], "<span class='userlink' onclick=\"site=1;catsite.value='user#".$row[1]."';document.mainpage.submit();\" $clickable_btn>@&shy;".$row[0].'</span>', $post);
+    }
+    
+    return $post;
+}
+
+function parsetext($post){
+    $post=dlt_doublebr(nl2br(dlt_html(umlaute($post))));
+    return $post;
+}
 
 $clickable_txt="onmouseover=\"this.style.color='#00ff00';\" onmouseout=\"this.style.color='#ffffff';\"";
 $clickable_opencomments="onmouseover=\"this.style.color='#00ff00';%POSTID%.src='/DATA/einklappen_green.png';\" onmouseout=\"this.style.color='#ffffff';%POSTID%.src='/DATA/einklappen.png';\"";

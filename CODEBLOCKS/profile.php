@@ -1,5 +1,6 @@
 <?php
 
+
 $unactive="";
 
 $kdid=0;
@@ -21,7 +22,7 @@ if($in == 1){
     echo "</div><div class='klappdivcontentbox' id='kdc$kdid' style='display:none;'>";
     echo "<div id='kdroh$kdid'>";
     $in2=0;
-    $sql = "SELECT blogs.id, blogs.name, ROUND((COUNT(CASE WHEN votes.vote=1 THEN 1 END)-COUNT(CASE WHEN votes.vote=0 THEN 1 END))/(COUNT(blogposts.id)-COUNT(CASE WHEN blogposts.title='' THEN 1 END)), 0) AS zahl, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) AS zahl2 FROM blogs, user, blogposts, votes, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.id=votes.type_id AND blogposts.title!='' AND votes.type=0 AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$profileid GROUP by blogs.id ORDER BY zahl2 desc, blogposts.id desc;";
+    $sql = "SELECT blogs.id, blogs.name, COUNT(DISTINCT subscriptions.id)-1 AS zahl2 FROM blogs, user, blogposts, subscriptions WHERE subscriptions.type=0 AND subscriptions.type_id=blogs.id AND blogposts.title!='' AND blogposts.blog=blogs.id AND blogs.owner=user.id AND user.id=$profileid GROUP by blogs.id ORDER BY zahl2 desc, MAX(blogposts.id) desc;";
     $out = mdq($bindung, $sql);
     while ($row = mysqli_fetch_row($out)) {
         $blogid=$row[0];
@@ -97,7 +98,7 @@ if($description != "" or $userid == $profileid){
             $klappdivdescription="klappdivdescription";
         }
         else{
-            $edittxt_bio="Add";
+            $edittxt_bio="add";
         }
         
         echo "<span class='right greytxt grey listfieldgreytxt' $clickable_grey onclick=\"event.stopPropagation();unactive_all.click();kd$kdid.click();kdroh$kdid.style.display='none';kdedit$kdid.style.display='block';\">$edittxt_bio</span>";
@@ -143,7 +144,7 @@ if($pubkey != "" or $userid == $profileid){
             $edittxt="edit";
         }
         else{
-            $edittxt="Add";
+            $edittxt="add";
         }
         
         echo "<span class='right greytxt grey listfieldgreytxt' $clickable_grey onclick=\"event.stopPropagation();kdc$kdid.style.display='block';unactive_all.click();kd$kdid.click();kdroh$kdid.style.display='none';kdedit$kdid.style.display='block';\">$edittxt</span>";

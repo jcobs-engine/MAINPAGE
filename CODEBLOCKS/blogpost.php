@@ -43,22 +43,10 @@ if(strpos($post, $beginn_of_str) === 0 and preg_match("#$end_of_str$#",$post) an
 }
 
 # [END] VERIFY #
-                    
-$post=umlaute($post);
-$post=Parsedown::instance()
-     ->setBreaksEnabled(true)
-     ->text($post);
-$post=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $post);
-$post=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $post);
-$i=1000;
-while ( $i > 0 ){
-    $post=str_replace('[^'.$i.']:', "<a name='f_post{$postid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $post);
-    $post=str_replace('[^'.$i.']', "<a href='#f_post{$postid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $post);
-    $i--;
-}
 
-$origpost=dlt_doublebr(nl2br(dlt_html(umlaute($row2[2]))));
-                    
+$post=parsehtml($post, $postid, $bindung, 'post', $clickable_btn);
+$origpost=parsetext($row2[2]);
+
 # [END] POST EDIT
 
                     
@@ -199,21 +187,9 @@ $post
             if($row3[2] != ''){
                 $commentid=$row3[3];
 
-                                    
-                $commenttext=Parsedown::instance()
-                            ->setBreaksEnabled(true)
-                            ->line(umlaute($row3[0]));
-                                    
-                $commenttext=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $commenttext);
-                $commenttext=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $commenttext);
-                $i=1000;
-                while ( $i > 0 ){
-                    $commenttext=str_replace('[^'.$i.']:', "<a name='f_comment{$commentid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $commenttext);
-                    $commenttext=str_replace('[^'.$i.']', "<a href='#f_comment{$commentid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $commenttext);
-                    $i--;
-                }
 
-                                    
+                $commenttext=parsehtml($row3[0], $commentid, $bindung, 'comment', $clickable_btn);
+
                 # REPLYS
 
                 if($_POST['replystat'] == $commentid){
@@ -296,7 +272,11 @@ $post
                         $full='_full';
                         $heartcursor='cursor:default;';
                     }
-                                                                        
+                    
+                    if($SETTING['contentdesign'] == 1){
+                        $full='_full_white';
+                    }
+                    
                     echo "<div class='greytxt grey commentowner' $clickable_grey onclick=\"event.stopPropagation();site.value=1;catsite.value='user#".$row3[2]."';document.mainpage.submit();\">".$row3[1]."</div>";
 
                     if($row3[2] == $userid){
@@ -331,20 +311,9 @@ onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commen
                         if($row4[3] != ''){
                             $replyid=$row4[3];
 
-                            $replytext=Parsedown::instance()
-                                      ->setBreaksEnabled(true)
-                                      ->line(umlaute($row4[0]));
-                                                
-                            $replytext=str_replace('<a href=', '<a target="_blank" style="color:#00ff00" href=', $replytext);
-                            $replytext=str_replace('<img src=', "<img style='max-width:100%; max-height:300px;' src=", $replytext);
-                            $i=1000;
-                            while ( $i > 0 ){
-                                $replytext=str_replace('[^'.$i.']:', "<a name='f_reply{$replyid}_$i' style='text-decoration:none; color:#40E0D0;font-weight:bold;'>&nbsp;&nbsp;&nbsp;$i:</a>", $replytext);
-                                $replytext=str_replace('[^'.$i.']', "<a href='#f_reply{$replyid}_$i' style='text-decoration:none; color:#40E0D0'><sup>[$i]</sup></a>", $replytext);
-                                $i--;
-                            }
-
-                                                
+                            $replytext=parsehtml($row4[0], $replyid, $bindung, 'reply', $clickable_btn);
+                            
+                                                                            
                             if($_POST['deletecomment'] == 'reply'.$row4[3] and $row4[2] == $userid){
                                 $sql = "DELETE FROM comments WHERE id=".$row4[3].";";
                                 $out5 = mdq($bindung, $sql);
@@ -360,7 +329,7 @@ onclick=\"if(replycontent$commentid.style.display == 'none'){replycontent$commen
                                 }
                                 else{
                                     if($SETTING['contentdesign'] != 1 ){
-                                        echo "<span class='grey' style='display:none;font-size:14px;' id='replys2{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys{$commentid}_".$row4[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();\" $clickable_grey>reply</div>
+                                        echo "<span class='grey' style='display:none;font-size:14px;' id='replys2{$commentid}_".$row4[3]."'>&nbsp;&#183;&nbsp;</span><div style='display:none;cursor:pointer;color:rgb(60%, 60%, 60%);font-size:14px' style='grey greytxt' id='replys{$commentid}_".$row4[3]."' onclick=\"replycontent$commentid.style.display='block';replystat.value='$commentid';replycontent$commentid.style.display='block';reply_einklappen$commentid.style.transform='rotate(0deg)';replyarea$commentid.focus();replyarea$commentid.innerHTML='@$row4[1] ';\" $clickable_grey>reply</div>
 <span id='mousebtns_2_{$postid}_{$commentid}_".$row4[3]."'></span><span id='mousebtns{$postid}_{$commentid}_".$row4[3]."'></span>";
                                     }
                                 }
