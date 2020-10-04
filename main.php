@@ -90,10 +90,11 @@ if(isset($_POST['editdescription'])){
 
 ### DELETING BY TIMESTAMP ###
 
-$sql = "SELECT id FROM user WHERE timeout+60*60-".time()."<=0 AND timeout!=0;";
+$sql = "SELECT id, username FROM user WHERE timeout+60*60-".time()."<=0 AND timeout!=0;";
 $out = mdq($bindung, $sql);
 while ($row = mysqli_fetch_row($out)) {
     $did=$row[0];
+    $deleteuserdir=$row[1];
     
     $sql2 = "DELETE FROM timestamps WHERE user=$did;";
     $out2 = mdq($bindung, $sql2);
@@ -135,6 +136,8 @@ while ($row = mysqli_fetch_row($out)) {
     $out2 = mdq($bindung, $sql2);
     $sql2 = "DELETE FROM user WHERE id=$did;";
     $out2 = mdq($bindung, $sql2);
+
+    $out2=shell_exec("rm -r content/".$row[1]);
 }    
 
 $sql = "SELECT id, type, typeid FROM votings WHERE time+60*60*24-".time()."<=0;";
@@ -443,6 +446,12 @@ But after an hour, all activity will be deleted.<p>
 
     # ==== BEGINNING FNCTNS ==== #
 
+    if($_POST['deleteuser'] == 1){
+        $sql = "UPDATE user SET password=':DELETED:', password_orig=':DELETED:' WHERE id=$userid;";
+        $out = mdq($bindung, $sql);
+        $userdeleted=1;
+    }
+    
     if($_POST['deleteblog'] != 0){
         $sql = "DELETE FROM blogs WHERE id=".$_POST['deleteblog']." and owner=$userid;";
         $out = mdq($bindung, $sql);
@@ -731,8 +740,6 @@ But after an hour, all activity will be deleted.<p>
 
                 $out=shell_exec("mv content/$username/ content/$editusername/ 2>&1");
 
-                echo $out;
-                
                 $username=$editusername;
                 
                 $sql = "UPDATE user SET username='$username', password='$password', password_orig='$password_orig' WHERE id=$userid;";
@@ -1027,10 +1034,14 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
     if($site == 1){
         # $$$ PROFILE $$$ #
         if($catsite == '0'){
-            echo "<div class='artikel' id='showprofile' style='display:$showdisplay'><div class='title'><span class='white'>></span> My Profile<img src='/DATA/link.png' title='$URL_domain/content/$username' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$username';\"></div><div class='bold text'>$username</div>";
+            echo "<div class='artikel' id='showprofile' style='display:$showdisplay'><div class='title'><span class='white'>></span> My Profile<img src='/DATA/link.png' title='$URL_domain/content/$username' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$username';\"></div>";
+            
+            echo "<img src='DATA/settings.png' class='setup_blog_symbol' $clickable_settings onclick=\"showprofile.style.display='none';editprofile.style.display='block';\">";
+
+            echo "<div class='bold text'>$username</div>";
 
             if($password != 'NONE'){
-                echo "<div class='text'>".$password_orig."</div><span class='grey'>(The password shown is MD5 hashed.)</span><span class='right greytxt editbtn' $clickable_txt onclick=\"showprofile.style.display='none';editprofile.style.display='block';\">edit</span><br>";
+                echo "<div class='text'>".$password_orig."</div><span class='grey'>(The password shown is MD5 hashed.)</span><br>";
             }
             echo "<div style='height:30px;'></div>";
 
@@ -1045,7 +1056,14 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
             include("CODEBLOCKS/profile.php");
 
             echo "</div>";
-            echo "<div class='box' id='editprofile' style='display:$editdisplay;'><div class='title'><span class='white'>></span> Edit Profile</div><div class='errorspan' style='display:$editerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_edit</div><input type='text' class='text' name='editusername' value='$username' placeholder='Username'><input type='password' placeholder='New password (optional)' name='editpassword' class='text'><input type='submit' name='editprofile' class='btn' value='edit' $clickable_btn></div>";
+            echo "<div class='box' id='editprofile' style='display:$editdisplay;'><div class='title'><span class='white'>></span> Settings</div>
+<input type='hidden' name='deleteuser' id='deleteuser' value='0'>
+<img src='DATA/close.png' class='close_button' $clickable_close onclick=\"showprofile.style.display='block';editprofile.style.display='none';\"><div class='errorspan' style='display:$editerrordisplay;'><b class='errorspan_arz'>!</b> $ERROR_edit</div><input type='text' class='text' name='editusername' value='$username' placeholder='Username'><input type='password' placeholder='New password (optional)' name='editpassword' class='text'><input type='submit' name='editprofile' class='btn' value='edit' $clickable_btn>
+<br><br><br>If you delete your account, your password will be removed and in your profile and blogs will noticed, that youre inactive:
+
+<input type='button' onclick=\"copymessage.style.display='block';copyfield.innerHTML='<div class=&quot;btn&quot; style=&quot;line-height:normal;width:500px;position:absolute;left:calc(50% - 250px);&quot; ".str_replace('"', '&quot;', str_replace("'", "\'", str_replace("#00ff00", "#ff0000", $clickable_btn)))." onclick=\'deleteuser.value=1;document.mainpage.submit();\'>Really Delete Account</div>';\" value='Delete Account' class='btn' ".str_replace('#00ff00', '#ff0000', $clickable_btn).">
+
+</div>";
 
         }
         # $$$ SEARCH USER $$$ #
@@ -1450,7 +1468,7 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
                         $editblog_errorspan='block';
                     }
                         
-                    echo "<div class='artikel' id='settings$blogid' style='display:$settingsdisplay'><div class='title'><span class='white'>></span> Settings</div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"settings$blogid.style.display='none';blog$blogid.style.display='block';\">
+                    echo "<div class='box' id='settings$blogid' style='display:$settingsdisplay'><div class='title'><span class='white'>></span> Settings</div><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"settings$blogid.style.display='none';blog$blogid.style.display='block';\">
 <div class='errorspan' style='display:$editblog_errorspan;'><b class='errorspan_arz'>!</b> $ERROR_editblog</div>
 <input type='text' name='editblogname' class='text' placeholder='Name' maxlength='32' id='editblogname' value='$blogname'>
 <input type='submit' name='editblog$blogid' value='edit' class='btn' $clickable_btn><p>
@@ -1551,14 +1569,29 @@ Thank you!<p><i>USER8</i> <img style='max-width:100%; max-height:300px;' src='DA
         }
 
         
-        $sql = "SELECT user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END) FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND user.id=$profileid;";
+        $sql = "SELECT user.username, COUNT(CASE WHEN subscriptions.user!=0 THEN 1 END), password, timeout FROM user, subscriptions WHERE subscriptions.type=1 AND subscriptions.type_id=user.id AND user.id=$profileid;";
         $out = mdq($bindung, $sql);
         while ($row = mysqli_fetch_row($out)) {
             $profilename=$row[0];
             $subs=$row[1];
+            if($row[2] == ':DELETED:'){
+                $inactive=1;
+            }
+            if($row[3] != 0){
+                $temporary=1;
+            }
         }
 
-        echo "<input type='hidden' name='subscribe_user' id='subscribe' value='0'><input type='hidden' name='unsubscribe_user' id='unsubscribe' value='0'><div class='artikel'><div class='title'><span class='white'>></span> $profilename<img src='/DATA/link.png' title='$URL_domain/content/$profilename' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$profilename';\"></div>";
+        echo "<input type='hidden' name='subscribe_user' id='subscribe' value='0'><input type='hidden' name='unsubscribe_user' id='unsubscribe' value='0'><div class='artikel'><div class='title'><span class='white'>></span> $profilename<img src='/DATA/link.png' title='$URL_domain/content/$profilename' class='linkicon' $clickable_linkicon onclick=\"copymessage.style.display='block';copyfield.innerHTML='$URL_domain/content/$profilename';\">";
+
+        if($inactive == 1){
+            echo "<code class='usertag'>deleted</code>";
+        }
+        if($temporary == 1){
+            echo "<code class='usertag'>temporary</code>";
+        }
+        
+        echo "</div>";
 
         if($blogownerid != $userid){
             $sub=0;
@@ -1708,9 +1741,19 @@ User already reported. See Votings.<p>
     }
 }
 
-echo "
-<div id='copymessage' style='display:none;' onclick=\"this.style.display='none';\"><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"copymessage.style.display='none';\"><div id='copyfield' onclick=\"event.stopPropagation();\"></div></div>
+if($userdeleted == 1){
+    echo "
+<script>$( document ).ready(function() {
+setTimeout(function(){ document.mainpage.submit(); }, 9200);
+});</script>
 
+<div id='copymessage' style='background-color:black;display:block;' onclick=\"document.mainpage.submit();\"><div id='copyfield' style='cursor:default;opacity:0;animation:in 1s, out 1s; animation-delay:0s, 3s;animation-fill-mode:forwards;'>Bye!</div><img src='/DATA/logo_$version.png' style='position:fixed;width:150px;height:150px;top:calc(50% - 75px);left:calc(50% - 75px);opacity:0;animation:in 1s, out 1s;animation-delay:4s, 8s;animation-fill-mode:forwards;'></div>";
+}else{
+    echo "
+<div id='copymessage' style='display:none;' onclick=\"this.style.display='none';\"><img src='DATA/close.png' class='close_button' $clickable_close onclick=\"copymessage.style.display='none';\"><div id='copyfield' onclick=\"event.stopPropagation();\"></div></div>";
+}
+
+echo "
 <input type='hidden' name='gt_blogpost' id='gt_blogpost' value='".$_POST['gt_blogpost']."'>
 <input type='hidden' name='votebackbtn' id='votebackbtn' value='0'>
 <input type='hidden' name='catsite' id='catsite' value='$catsite'>

@@ -209,6 +209,18 @@ body{
     font-weight:bold;
 }
 
+.red{
+    color:#ff0000;
+}
+
+.usertag{
+    font-size:14px;
+    margin-left:10px;
+    color:#ff0000;
+    font-weight:bold;
+    cursor:default;
+}
+
 .errorspan{
     color:#ff0000;
     padding-top:0px;
@@ -830,4 +842,35 @@ code{
     padding-left:3px;
     padding-right:3px;
     border-radius:2px;
+}
+
+.userlink{
+    cursor:pointer;
+    color:#000000;
+    font-weight:bold;
+    background-color:#ffffff;
+    padding:1px;
+    padding-left:3px;
+    padding-right:3px;
+    border-radius:2px;
+}
+
+/* KEYFRAMES */
+
+@keyframes in{
+    0%{
+	opacity:0;
+    }
+    100%{
+	opacity:1;
+    }
+}
+
+@keyframes out{
+    0%{
+	opacity:1;
+    }
+    100%{
+	opacity:0;
+    }
 }
